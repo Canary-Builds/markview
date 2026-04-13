@@ -6,6 +6,27 @@ versioning follows [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-04-13
+
+### Added
+- **Edit toolbar** revealed below the header when edit mode is active. Groups:
+  - File: **New** (`Ctrl+N`), **Save** (`Ctrl+S`), **Save As** (`Ctrl+Shift+S`).
+  - History: **Undo** (`Ctrl+Z`), **Redo** (`Ctrl+Shift+Z` or `Ctrl+Y`).
+  - Clipboard: **Cut**, **Copy**, **Paste**.
+  - Formatting: **Bold** (`Ctrl+B`), **Italic** (`Ctrl+I`), **Strikethrough**, **Heading** (`Ctrl+H`), **Link** (`Ctrl+K`), **Inline code**, **Quote**, **Bulleted list**, **Numbered list**, **Checklist item**, **Image**, **Horizontal rule**.
+  - View: segmented **Editor / Split / Preview** toggle.
+  - Find: **Find** button + `Ctrl+F` reveals a search bar with next/prev.
+- **Split view** with live preview — editor left, rendered view right, auto-refreshing 220ms after you stop typing.
+- **Untitled buffer** — `New` starts a fresh document that prompts for a location on first save.
+- **Discard-changes confirmation** dialog when opening/creating a file with unsaved edits.
+- GtkSourceView-based editor: native undo/redo, markdown syntax highlighting, line numbers, current-line highlight, style scheme that tracks the theme.
+- Image insert dialog computes a path relative to the current file's folder when possible.
+
+### Changed
+- Central content area rebuilt dynamically for the active mode/view (preview / editor / split).
+- Dirty-state indicator uses a small bullet (`•`) in the header title; subtitle shows `(unsaved)` for untitled buffers.
+- Leaving edit mode prompts to save when the buffer is dirty.
+
 ## [0.2.0] — 2026-04-13
 
 ### Added

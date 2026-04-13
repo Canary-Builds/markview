@@ -20,7 +20,7 @@ import gi
 gi.require_version("Gtk", "3.0")
 gi.require_version("WebKit2", "4.1")
 gi.require_version("GtkSource", "4")
-from gi.repository import Gtk, WebKit2, Gio, GLib, Gdk, GtkSource, Pango  # noqa: E402
+from gi.repository import Gtk, WebKit2, Gio, GLib, Gdk, GtkSource, Pango, GdkPixbuf  # noqa: E402
 
 import markdown  # noqa: E402
 from markdown.extensions.toc import slugify  # noqa: E402
@@ -31,7 +31,7 @@ try:
 except Exception:
     _html2text = None
 
-__version__ = "0.5.1"
+__version__ = "0.5.2"
 
 APP_ID = "dev.markview.Viewer"
 APP_NAME = "markview"
@@ -41,6 +41,13 @@ CONFIG_DIR = Path(os.environ.get("XDG_CONFIG_HOME", str(Path.home() / ".config")
 STATE_DIR = Path(os.environ.get("XDG_STATE_HOME", str(Path.home() / ".local/state"))) / "markview"
 CUSTOM_CSS_PATH = CONFIG_DIR / "custom.css"
 SNAPSHOT_DIR = STATE_DIR / "snapshots"
+LAST_SHOWN_VERSION_PATH = STATE_DIR / "last-shown-version"
+
+DEVELOPER = "Canary Builds"
+WEBSITE = "https://canarybuilds.com/"
+REPO_URL = "https://github.com/Canary-Builds/markview"
+ISSUES_URL = f"{REPO_URL}/issues/new/choose"
+WIKI_URL = f"{REPO_URL}/wiki"
 
 MD_EXTENSIONS = [
     "fenced_code", "tables", "toc", "codehilite", "sane_lists",
@@ -679,6 +686,7 @@ class Viewer(Gtk.ApplicationWindow):
         else:
             self._render_welcome()
         self._refresh_content()
+        GLib.idle_add(self._maybe_show_whats_new_on_upgrade)
 
     # ---- theme --------------------------------------------------------------
 
@@ -717,9 +725,23 @@ class Viewer(Gtk.ApplicationWindow):
         header.pack_start(self.edit_btn)
         header.pack_start(_icon_button("view-refresh-symbolic", "Reload (Ctrl+R)",
                                        lambda *_: self._reload()))
+        # Right side: hamburger (rightmost) → theme to its left
+        header.pack_end(self._build_menu())
         self.theme_btn = _icon_button(self._theme_icon(), "Theme (Ctrl+D)",
                                       self._toggle_theme)
         header.pack_end(self.theme_btn)
+
+    def _build_menu(self):
+        return _menu_button("open-menu-symbolic", "Menu", [
+            ("Keyboard Shortcuts",  self._show_shortcuts),
+            (f"What’s New in {__version__}", self._show_whats_new),
+            None,
+            ("Documentation",       lambda: self._open_url(WIKI_URL)),
+            ("Report an Issue",     lambda: self._open_url(ISSUES_URL)),
+            (f"Visit {DEVELOPER}",  lambda: self._open_url(WEBSITE)),
+            None,
+            (f"About {APP_NAME}",   self._show_about),
+        ])
 
     # ---- editor widgets -----------------------------------------------------
 
@@ -1601,6 +1623,12 @@ class Viewer(Gtk.ApplicationWindow):
             ("Export as DOCX (via pandoc)", "", "action:export_docx"),
             ("Export as HTML (via pandoc)", "", "action:export_html"),
             ("Export as EPUB (via pandoc)", "", "action:export_epub"),
+            (f"What’s New in {__version__}", "", "action:whats_new"),
+            ("Keyboard Shortcuts", "", "action:shortcuts"),
+            (f"About {APP_NAME}", "", "action:about"),
+            (f"Visit {DEVELOPER} website", "", "action:website"),
+            ("Open Documentation", "", "action:docs"),
+            ("Report an Issue", "", "action:issues"),
         ]
         for l, s, k in actions:
             items.append({"label": l, "sub": s, "key": k})
@@ -1694,6 +1722,12 @@ class Viewer(Gtk.ApplicationWindow):
                 "export_docx": lambda *_: self._pandoc_export("docx"),
                 "export_html": lambda *_: self._pandoc_export("html"),
                 "export_epub": lambda *_: self._pandoc_export("epub"),
+                "whats_new": self._show_whats_new,
+                "shortcuts": self._show_shortcuts,
+                "about": self._show_about,
+                "website": lambda *_: self._open_url(WEBSITE),
+                "docs": lambda *_: self._open_url(WIKI_URL),
+                "issues": lambda *_: self._open_url(ISSUES_URL),
                 "split": lambda *_: (self._ensure_edit_mode(),
                                      self._set_edit_view("split", self.view_split_btn)),
                 "editor_only": lambda *_: (self._ensure_edit_mode(),
@@ -2158,6 +2192,141 @@ class Viewer(Gtk.ApplicationWindow):
             buf.insert_at_cursor("[text](https://)")
         buf.end_user_action()
         self.editor.grab_focus()
+
+    # ---- help menu actions --------------------------------------------------
+
+    def _open_url(self, url: str):
+        try:
+            Gtk.show_uri_on_window(self, url, Gdk.CURRENT_TIME)
+        except Exception:
+            try:
+                Gio.AppInfo.launch_default_for_uri(url, None)
+            except Exception as exc:
+                self._render_error(f"Could not open {url}: {exc}")
+
+    def _show_about(self, *_):
+        d = Gtk.AboutDialog(transient_for=self, modal=True)
+        d.set_program_name(APP_NAME)
+        d.set_version(__version__)
+        d.set_comments("Minimal, modern markdown viewer + editor for Linux.")
+        d.set_copyright(f"© 2026 {DEVELOPER}")
+        d.set_license_type(Gtk.License.MIT_X11)
+        d.set_website(WEBSITE)
+        d.set_website_label(WEBSITE.rstrip("/").split("//", 1)[-1])
+        d.set_authors([f"{DEVELOPER} <{WEBSITE}>"])
+        icon = APP_DIR / "icon.png"
+        if icon.exists():
+            try:
+                pb = GdkPixbuf.Pixbuf.new_from_file_at_scale(str(icon), 128, 128, True)
+                d.set_logo(pb)
+            except Exception:
+                pass
+        d.run()
+        d.destroy()
+
+    def _show_whats_new(self, *_):
+        text = self._latest_changelog_section()
+        d = Gtk.Dialog(title=f"What’s new in {APP_NAME} {__version__}",
+                       transient_for=self, modal=True)
+        d.add_buttons("Close", Gtk.ResponseType.CLOSE)
+        d.set_default_size(620, 560)
+        web = WebKit2.WebView()
+        web.get_settings().set_property("enable-javascript", False)
+        web.load_html(render(text, self.theme, "What’s new", APP_DIR),
+                      APP_DIR.as_uri() + "/")
+        scroller = Gtk.ScrolledWindow()
+        scroller.set_hexpand(True); scroller.set_vexpand(True)
+        scroller.add(web)
+        d.get_content_area().pack_start(scroller, True, True, 0)
+        d.show_all()
+        d.run()
+        d.destroy()
+
+    def _latest_changelog_section(self) -> str:
+        cp = APP_DIR / "CHANGELOG.md"
+        if not cp.exists():
+            return f"# {APP_NAME} {__version__}\n\n(No CHANGELOG.md found.)"
+        try:
+            text = cp.read_text(encoding="utf-8")
+        except OSError:
+            return f"# {APP_NAME} {__version__}\n\n(CHANGELOG.md unreadable.)"
+        # find the FIRST `## [<not-Unreleased>]` heading and capture until the next `## [`
+        pat = re.compile(r"^## \[(?!Unreleased)([^\]]+)\][^\n]*$", re.MULTILINE)
+        m = pat.search(text)
+        if not m:
+            return f"# {APP_NAME} {__version__}\n\nNo released entries found yet."
+        start = m.start()
+        nxt = pat.search(text, m.end())
+        end = nxt.start() if nxt else len(text)
+        return text[start:end].strip()
+
+    def _show_shortcuts(self, *_):
+        win = Gtk.ShortcutsWindow(transient_for=self, modal=True)
+        section = Gtk.ShortcutsSection(visible=True, section_name="main",
+                                       title="Shortcuts", max_height=12)
+
+        def group(title, items):
+            g = Gtk.ShortcutsGroup(visible=True, title=title)
+            for accel, label in items:
+                g.add(Gtk.ShortcutsShortcut(visible=True, accelerator=accel, title=label))
+            return g
+
+        section.add(group("File", [
+            ("<Primary>o", "Open file"),
+            ("<Primary>n", "New document"),
+            ("<Primary>s", "Save"),
+            ("<Primary><Shift>s", "Save As"),
+            ("<Primary>r", "Reload"),
+            ("<Primary>q", "Quit"),
+        ]))
+        section.add(group("View", [
+            ("<Primary>e", "Toggle edit mode"),
+            ("<Primary><Shift>o", "Toggle outline sidebar"),
+            ("<Primary><Shift>t", "Toggle typewriter mode"),
+            ("<Primary>d", "Toggle theme"),
+        ]))
+        section.add(group("Navigation", [
+            ("<Primary>p", "Command palette"),
+            ("<Primary>f", "Find in buffer"),
+            ("<Primary><Shift>f", "Search in folder"),
+            ("<Alt>Left", "Back"),
+            ("<Alt>Right", "Forward"),
+        ]))
+        section.add(group("Editing", [
+            ("<Primary>z", "Undo"),
+            ("<Primary><Shift>z", "Redo"),
+            ("<Primary>x <Primary>c <Primary>v", "Cut · Copy · Smart paste"),
+            ("<Alt>Up", "Move line up"),
+            ("<Alt>Down", "Move line down"),
+            ("Return", "Smart list continuation"),
+        ]))
+        section.add(group("Formatting", [
+            ("<Primary>b", "Bold"),
+            ("<Primary>i", "Italic"),
+            ("<Primary>k", "Link"),
+            ("<Primary>h", "Heading 1"),
+        ]))
+        win.add_section(section)
+        win.show_all()
+
+    def _maybe_show_whats_new_on_upgrade(self):
+        try:
+            last = (LAST_SHOWN_VERSION_PATH.read_text().strip()
+                    if LAST_SHOWN_VERSION_PATH.exists() else "")
+        except OSError:
+            last = ""
+        if last != __version__:
+            try:
+                STATE_DIR.mkdir(parents=True, exist_ok=True)
+                LAST_SHOWN_VERSION_PATH.write_text(__version__)
+            except OSError:
+                pass
+            # don't pop the dialog on the very first run, only on actual upgrades
+            if last:
+                self._show_whats_new()
+        return False
+
+    # ---- editor inserts -----------------------------------------------------
 
     def _insert_image(self):
         d = Gtk.FileChooserDialog(title="Insert image", parent=self,

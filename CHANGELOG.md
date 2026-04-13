@@ -6,6 +6,23 @@ versioning follows [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.5.2] — 2026-04-13
+
+### Added
+- **Help menu** — hamburger button on the right side of the header bar with:
+  - **Keyboard Shortcuts** — opens a native `Gtk.ShortcutsWindow` grouped by File / View / Navigation / Editing / Formatting.
+  - **What’s New in `<version>`** — pops the latest CHANGELOG section in a styled WebKit dialog. Auto-shown once the first time a new version launches (skipped on first ever install).
+  - **Documentation** — opens the GitHub Wiki.
+  - **Report an Issue** — opens the GitHub issue chooser.
+  - **Visit Canary Builds** — opens [https://canarybuilds.com/](https://canarybuilds.com/).
+  - **About markview** — `Gtk.AboutDialog` with version, credits, MIT license, app icon, and developer link.
+- All help-menu entries are also surfaced in the command palette (`Ctrl+P`).
+- Last-shown-version pin at `~/.local/state/markview/last-shown-version` so the upgrade dialog appears exactly once per release.
+
+### Notes
+- Developer is now declared as **Canary Builds** (https://canarybuilds.com/) in About + menu.
+- No keyboard shortcuts changed; the menu is keyboard-discoverable via the palette and click-discoverable via the header.
+
 ## [0.5.1] — 2026-04-13
 
 ### Fixed

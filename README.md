@@ -11,6 +11,20 @@
   <img src="icon.png" width="128" alt="markview logo">
 </p>
 
+## Screenshots
+
+<p align="center">
+  <a href="docs/screenshots/01-preview.png"><img src="docs/screenshots/01-preview.png" width="49%" alt="Reading view"></a>
+  <a href="docs/screenshots/02-split-view.png"><img src="docs/screenshots/02-split-view.png" width="49%" alt="Split view with live preview"></a>
+</p>
+<p align="center">
+  <a href="docs/screenshots/03-editor.png"><img src="docs/screenshots/03-editor.png" width="32%" alt="Editor with markdown syntax highlighting"></a>
+  <a href="docs/screenshots/04-dark-mode.png"><img src="docs/screenshots/04-dark-mode.png" width="32%" alt="Dark theme"></a>
+  <a href="docs/screenshots/05-command-palette.png"><img src="docs/screenshots/05-command-palette.png" width="32%" alt="Command palette (Ctrl+P)"></a>
+</p>
+
+<p align="center"><sub>Reading view · Split view · Editor · Dark theme · Command palette (Ctrl+P)</sub></p>
+
 ---
 
 ## What it is

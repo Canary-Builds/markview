@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=markview
+GenericName=Markdown Viewer
+Comment=Minimal, modern markdown viewer
+Exec=HOME_MARKVIEW_PATH %F
+Icon=HOME_MARKVIEW_ICON
+Terminal=false
+Categories=Office;Viewer;Utility;
+MimeType=text/markdown;text/x-markdown;text/plain;
+Keywords=markdown;md;viewer;notes;
+StartupNotify=true

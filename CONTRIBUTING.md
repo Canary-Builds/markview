@@ -13,7 +13,7 @@ If your idea fits, let's ship it.
 
 ## Before you start
 
-1. Look at [open issues](https://github.com/mareekkk/markview/issues) — the item may already be in progress.
+1. Look at [open issues](https://github.com/Canary-Builds/markview/issues) — the item may already be in progress.
 2. Check [ROADMAP.md](ROADMAP.md) — your feature may already be scoped to a future release.
 3. For a non-trivial change, **open an issue first** and sketch the approach. Saves both of us time.
 

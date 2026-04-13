@@ -8,7 +8,7 @@
 [![platform](https://img.shields.io/badge/platform-Linux-lightgrey)](#install)
 
 <p align="center">
-  <img src="icon.svg" width="96" alt="markview logo">
+  <img src="icon.png" width="128" alt="markview logo">
 </p>
 
 ---
@@ -65,7 +65,7 @@ Open / New / Save · Toggle edit / split / preview · Outline · Typewriter · R
 sudo apt install python3-gi gir1.2-gtk-3.0 gir1.2-webkit2-4.1 \
                  gir1.2-gtksource-4 python3-markdown python3-pygments
 
-git clone https://github.com/mareekkk/markview.git ~/markview
+git clone https://github.com/Canary-Builds/markview.git ~/markview
 cd ~/markview && ./install.sh
 ```
 
@@ -141,7 +141,9 @@ See [Configuration](docs/wiki/Configuration.md) for details.
 markview/
 ├── markview.py         # single-file app (~1500 lines)
 ├── style.css           # preview theme (light/dark/print)
-├── icon.svg            # app icon
+├── icon-final.png      # master icon (1536×1024 source)
+├── icon.png            # 512×512 square (installed via install.sh)
+├── icon-{16..256}.png  # hicolor sizes
 ├── markview.desktop    # desktop entry template
 ├── install.sh          # user-local installer
 ├── uninstall.sh

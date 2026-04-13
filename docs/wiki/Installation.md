@@ -57,7 +57,7 @@ python3 -c "import markdown, pygments; print('md+pygments ok')"
 ## Get the code
 
 ```bash
-git clone https://github.com/mareekkk/markview.git ~/markview
+git clone https://github.com/Canary-Builds/markview.git ~/markview
 cd ~/markview
 ```
 

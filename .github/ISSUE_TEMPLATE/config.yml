@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Discussions
-    url: https://github.com/mareekkk/markview/discussions
+    url: https://github.com/Canary-Builds/markview/discussions
     about: Questions, ideas, how-to, show-and-tell.
   - name: Security advisory
-    url: https://github.com/mareekkk/markview/security/advisories/new
+    url: https://github.com/Canary-Builds/markview/security/advisories/new
     about: Report a security vulnerability privately.

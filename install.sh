@@ -5,9 +5,9 @@ set -euo pipefail
 APP_DIR="$(cd "$(dirname "$0")" && pwd)"
 BIN_DIR="${HOME}/.local/bin"
 APPS_DIR="${HOME}/.local/share/applications"
-ICONS_DIR="${HOME}/.local/share/icons/hicolor/scalable/apps"
+HICOLOR="${HOME}/.local/share/icons/hicolor"
 
-mkdir -p "${BIN_DIR}" "${APPS_DIR}" "${ICONS_DIR}"
+mkdir -p "${BIN_DIR}" "${APPS_DIR}"
 
 # Ensure python entrypoint is executable.
 chmod +x "${APP_DIR}/markview.py"
@@ -19,8 +19,18 @@ exec python3 "${APP_DIR}/markview.py" "\$@"
 EOF
 chmod +x "${BIN_DIR}/markview"
 
-# Icon.
-cp -f "${APP_DIR}/icon.svg" "${ICONS_DIR}/markview.svg"
+# Icon — install all hicolor sizes that exist.
+for size in 16 32 48 64 128 256 512; do
+  src="${APP_DIR}/icon-${size}.png"
+  if [[ "${size}" == "512" ]]; then
+    src="${APP_DIR}/icon.png"
+  fi
+  if [[ -f "${src}" ]]; then
+    dest="${HICOLOR}/${size}x${size}/apps"
+    mkdir -p "${dest}"
+    cp -f "${src}" "${dest}/markview.png"
+  fi
+done
 
 # Desktop entry with real paths substituted in.
 sed \
@@ -32,11 +42,12 @@ sed \
 command -v update-desktop-database >/dev/null && \
   update-desktop-database "${APPS_DIR}" >/dev/null 2>&1 || true
 command -v gtk-update-icon-cache >/dev/null && \
-  gtk-update-icon-cache -f -t "${HOME}/.local/share/icons/hicolor" >/dev/null 2>&1 || true
+  gtk-update-icon-cache -f -t "${HICOLOR}" >/dev/null 2>&1 || true
 
 echo "markview installed."
 echo "  CLI:     ${BIN_DIR}/markview"
 echo "  Desktop: ${APPS_DIR}/markview.desktop"
+echo "  Icon:    ${HICOLOR}/<size>/apps/markview.png"
 echo
 case ":${PATH}:" in
   *":${BIN_DIR}:"*) ;;

@@ -30,7 +30,9 @@ Or make the CLI launcher point at your checkout by re-running `./install.sh` fro
 markview/
 ├── markview.py         # the app, single file
 ├── style.css           # preview theme
-├── icon.svg            # app icon
+├── icon.png            # app icon (square 512×512)
+├── icon-final.png      # master source icon
+├── icon-{16..256}.png  # hicolor sizes generated from master
 ├── markview.desktop    # desktop entry template
 ├── install.sh          # user-local installer
 ├── uninstall.sh

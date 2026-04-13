@@ -27,6 +27,8 @@ flatpak run com.canarybuilds.Markview
 
 If Flathub says the app is not found yet, it means the submission is still under review/publishing.
 
+Arch/Manjaro AUR and Fedora packaging are planned but not yet published. Track this in [ROADMAP.md](../../ROADMAP.md).
+
 ## Source install (manual)
 
 Use this if you want local development or if your distro package is not available yet.
@@ -57,24 +59,6 @@ sudo apt install python3-gi gir1.2-gtk-3.0 gir1.2-webkit2-4.1 \
                  gir1.2-gtksource-4 python3-markdown python3-pygments
 # optional
 sudo apt install pandoc python3-html2text
-```
-
-### Arch / Manjaro
-
-```bash
-sudo pacman -S python-gobject gtk3 webkit2gtk-4.1 gtksourceview4 \
-               python-markdown python-pygments
-# optional
-sudo pacman -S pandoc python-html2text
-```
-
-### Fedora
-
-```bash
-sudo dnf install python3-gobject gtk3 webkit2gtk4.1 gtksourceview4 \
-                 python3-markdown python3-pygments
-# optional
-sudo dnf install pandoc python3-html2text
 ```
 
 ## Verify dependencies
@@ -129,4 +113,3 @@ markview -V
 ```bash
 ~/markview/uninstall.sh
 ```
-

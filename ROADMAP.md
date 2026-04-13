@@ -47,7 +47,7 @@ Targeting the six features that were deliberately held back in 0.5 to keep the r
 - 🟡 **GTK4 + libadwaita port** — matches modern Linux desktops; `Adw.TabView` for multi-document; `Adw.HeaderBar` with adaptive layout.
 - 🟡 **Plugin API** — discover Python modules under `~/.config/markview/plugins/`; stable hook points for render post-processing, palette items, and toolbar additions.
 - 🟡 **Accessibility audit** — focus order, screen-reader labels, high-contrast theme, keyboard-only coverage.
-- 🟡 **Packaging** — Flatpak on Flathub, AUR `markview`, Debian source package, pip-installable wheel for `pip install markview` onto systems with PyGObject.
+- 🟡 **Packaging** — Flatpak on Flathub, Ubuntu PPA maintenance, AUR `markview` (for Arch/Manjaro), Fedora COPR package, and a pip-installable wheel for `pip install markview` on systems with PyGObject.
 - 🟡 **i18n** — gettext catalog, first pass of translations (contrib-driven).
 
 ## Post-1.0 — Stretch ⚪

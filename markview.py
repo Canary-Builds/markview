@@ -74,6 +74,20 @@ WORD_COUNT_DEBOUNCE_MS = 250
 SEARCH_RESULT_CAP = 500
 PALETTE_ITEM_CAP = 200
 SNAPSHOT_KEEP = 30
+RECENTS_PATH = STATE_DIR / "recent.json"
+RECENT_MAX = 50
+MARKDOWN_ROOT_PATH = STATE_DIR / "markdown-root.txt"
+MARKDOWN_SCAN_MAX = 10000
+MARKDOWN_EXTENSIONS = {".md", ".markdown", ".mdown", ".mkd"}
+MARKDOWN_SKIP_DIRS = {
+    ".git",
+    "node_modules",
+    ".venv",
+    "venv",
+    "__pycache__",
+    ".flatpak-builder",
+    ".craft",
+}
 
 preprocess_tasks = _preprocess_tasks
 preprocess_transclusions = _preprocess_transclusions
@@ -107,6 +121,70 @@ def write_snapshot(path: Path, text: str) -> Path | None:
 
 def list_snapshots(path: Path) -> list[Path]:
     return _list_snapshots(path, snapshot_dir=SNAPSHOT_DIR)
+
+
+def load_recents() -> list[Path]:
+    try:
+        raw = json.loads(RECENTS_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return []
+    if not isinstance(raw, list):
+        return []
+    out = []
+    for item in raw:
+        if isinstance(item, str) and item.strip():
+            out.append(Path(item))
+    return out
+
+
+def save_recents(paths: list[Path]):
+    unique: list[str] = []
+    seen: set[str] = set()
+    for p in paths:
+        s = str(p.resolve())
+        if s in seen:
+            continue
+        seen.add(s)
+        unique.append(s)
+    try:
+        STATE_DIR.mkdir(parents=True, exist_ok=True)
+        RECENTS_PATH.write_text(
+            json.dumps(unique[:RECENT_MAX], ensure_ascii=False),
+            encoding="utf-8",
+        )
+    except OSError:
+        pass
+
+
+def add_recent(path: Path):
+    path = path.resolve()
+    recents = load_recents()
+    recents = [p for p in recents if p != path]
+    recents.insert(0, path)
+    save_recents(recents)
+
+
+def load_markdown_root() -> Path | None:
+    try:
+        value = MARKDOWN_ROOT_PATH.read_text(encoding="utf-8").strip()
+    except OSError:
+        return None
+    if not value:
+        return None
+    p = Path(value)
+    return p if p.is_dir() else None
+
+
+def save_markdown_root(path: Path | None):
+    try:
+        STATE_DIR.mkdir(parents=True, exist_ok=True)
+        if path is None:
+            if MARKDOWN_ROOT_PATH.exists():
+                MARKDOWN_ROOT_PATH.unlink()
+            return
+        MARKDOWN_ROOT_PATH.write_text(str(path.resolve()), encoding="utf-8")
+    except OSError:
+        pass
 
 
 def welcome_html(theme: str) -> str:
@@ -307,33 +385,109 @@ class CommandPalette(Gtk.Window):
 # --- outline sidebar ---------------------------------------------------------
 
 class OutlineSidebar(Gtk.Box):
-    def __init__(self, on_jump):
+    def __init__(
+            self,
+            on_jump,
+            on_open_history,
+            on_open_markdown,
+            on_choose_markdown_folder,
+            on_rescan_markdown_folder):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=0)
-        self.set_size_request(240, -1)
+        self.set_size_request(280, -1)
         self.on_jump = on_jump
-        header = Gtk.Label(label="Outline", xalign=0)
-        header.set_margin_top(8)
-        header.set_margin_start(12)
-        header.set_margin_bottom(4)
-        header.get_style_context().add_class("dim-label")
-        self.pack_start(header, False, False, 0)
-        self.listbox = Gtk.ListBox()
-        self.listbox.set_activate_on_single_click(True)
-        self.listbox.connect(
-            "row-activated",
-            lambda _lb,
-            row: self._on_row(row))
-        scroller = Gtk.ScrolledWindow()
-        scroller.set_hexpand(False)
-        scroller.set_vexpand(True)
-        scroller.add(self.listbox)
-        self.pack_start(scroller, True, True, 0)
+        self.on_open_history = on_open_history
+        self.on_open_markdown = on_open_markdown
+        self.on_choose_markdown_folder = on_choose_markdown_folder
+        self.on_rescan_markdown_folder = on_rescan_markdown_folder
+
+        self.stack = Gtk.Stack()
+        self.stack.set_transition_type(Gtk.StackTransitionType.CROSSFADE)
+        self.stack.set_transition_duration(120)
+
+        # Outline tab
+        self.outline_listbox = Gtk.ListBox()
+        self.outline_listbox.set_activate_on_single_click(True)
+        self.outline_listbox.connect("row-activated", self._on_outline_row)
+        outline_scroller = Gtk.ScrolledWindow()
+        outline_scroller.set_hexpand(False)
+        outline_scroller.set_vexpand(True)
+        outline_scroller.add(self.outline_listbox)
+        self.stack.add_titled(outline_scroller, "outline", "Outline")
+
+        # History tab
+        self.history_listbox = Gtk.ListBox()
+        self.history_listbox.set_activate_on_single_click(True)
+        self.history_listbox.connect("row-activated", self._on_history_row)
+        history_scroller = Gtk.ScrolledWindow()
+        history_scroller.set_hexpand(False)
+        history_scroller.set_vexpand(True)
+        history_scroller.add(self.history_listbox)
+        self.stack.add_titled(history_scroller, "history", "History")
+
+        # Markdown tab
+        self.markdown_listbox = Gtk.ListBox()
+        self.markdown_listbox.set_activate_on_single_click(True)
+        self.markdown_listbox.connect("row-activated", self._on_markdown_row)
+        markdown_scroller = Gtk.ScrolledWindow()
+        markdown_scroller.set_hexpand(False)
+        markdown_scroller.set_vexpand(True)
+        markdown_scroller.add(self.markdown_listbox)
+
+        choose_btn = _icon_button(
+            "folder-open-symbolic",
+            "Choose markdown folder",
+            self.on_choose_markdown_folder,
+        )
+        rescan_btn = _icon_button(
+            "view-refresh-symbolic",
+            "Rescan selected folder",
+            self.on_rescan_markdown_folder,
+        )
+        controls = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
+        controls.set_margin_top(6)
+        controls.set_margin_bottom(4)
+        controls.set_margin_start(8)
+        controls.set_margin_end(8)
+        controls.pack_start(choose_btn, False, False, 0)
+        controls.pack_start(rescan_btn, False, False, 0)
+
+        self.markdown_folder_label = Gtk.Label(label="No folder selected", xalign=0)
+        self.markdown_folder_label.set_ellipsize(Pango.EllipsizeMode.MIDDLE)
+        self.markdown_folder_label.get_style_context().add_class("dim-label")
+        self.markdown_folder_label.set_margin_start(10)
+        self.markdown_folder_label.set_margin_end(10)
+
+        self.markdown_status_label = Gtk.Label(label="", xalign=0)
+        self.markdown_status_label.set_ellipsize(Pango.EllipsizeMode.END)
+        self.markdown_status_label.get_style_context().add_class("dim-label")
+        self.markdown_status_label.set_margin_start(10)
+        self.markdown_status_label.set_margin_end(10)
+        self.markdown_status_label.set_margin_bottom(6)
+
+        markdown_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        markdown_box.pack_start(controls, False, False, 0)
+        markdown_box.pack_start(self.markdown_folder_label, False, False, 0)
+        markdown_box.pack_start(self.markdown_status_label, False, False, 0)
+        markdown_box.pack_start(markdown_scroller, True, True, 0)
+        self.stack.add_titled(markdown_box, "markdown", "Markdown")
+
+        switcher = Gtk.StackSwitcher()
+        switcher.set_stack(self.stack)
+        switcher.set_halign(Gtk.Align.CENTER)
+        switcher.set_margin_top(6)
+        switcher.set_margin_bottom(6)
+
+        self.pack_start(switcher, False, False, 0)
+        self.pack_start(self.stack, True, True, 0)
         self.pack_start(Gtk.Separator(orientation=Gtk.Orientation.VERTICAL),
                         False, False, 0)
 
+        self.update_history([])
+        self.set_markdown_results(None, [], False, "Choose a folder to scan markdown files.")
+
     def update(self, headings):
-        for c in self.listbox.get_children():
-            self.listbox.remove(c)
+        for c in self.outline_listbox.get_children():
+            self.outline_listbox.remove(c)
         for h in headings:
             row = Gtk.ListBoxRow()
             row.line = h["line"]
@@ -345,12 +499,118 @@ class OutlineSidebar(Gtk.Box):
             lbl.set_margin_top(3)
             lbl.set_margin_bottom(3)
             row.add(lbl)
-            self.listbox.add(row)
-        self.listbox.show_all()
+            self.outline_listbox.add(row)
+        self.outline_listbox.show_all()
 
-    def _on_row(self, row):
+    def update_history(self, paths: list[Path]):
+        for c in self.history_listbox.get_children():
+            self.history_listbox.remove(c)
+        if not paths:
+            row = Gtk.ListBoxRow()
+            row.file_path = None
+            lbl = Gtk.Label(label="No recent files yet", xalign=0)
+            lbl.set_margin_top(8)
+            lbl.set_margin_bottom(8)
+            lbl.set_margin_start(10)
+            lbl.set_margin_end(10)
+            lbl.get_style_context().add_class("dim-label")
+            row.add(lbl)
+            self.history_listbox.add(row)
+            self.history_listbox.show_all()
+            return
+        for p in paths:
+            row = Gtk.ListBoxRow()
+            row.file_path = p
+            box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+            box.set_margin_top(6)
+            box.set_margin_bottom(6)
+            box.set_margin_start(8)
+            box.set_margin_end(8)
+            name = Gtk.Label(label=p.name, xalign=0)
+            name.set_ellipsize(Pango.EllipsizeMode.END)
+            sub = Gtk.Label(label=str(p), xalign=0)
+            sub.set_ellipsize(Pango.EllipsizeMode.MIDDLE)
+            sub.get_style_context().add_class("dim-label")
+            box.pack_start(name, False, False, 0)
+            box.pack_start(sub, False, False, 0)
+            row.add(box)
+            self.history_listbox.add(row)
+        self.history_listbox.show_all()
+
+    def set_markdown_results(
+            self,
+            root: Path | None,
+            files: list[Path],
+            truncated: bool,
+            status: str):
+        for c in self.markdown_listbox.get_children():
+            self.markdown_listbox.remove(c)
+        self.markdown_folder_label.set_text(str(root) if root else "No folder selected")
+        self.markdown_status_label.set_text(status)
+        if not files:
+            row = Gtk.ListBoxRow()
+            row.file_path = None
+            lbl = Gtk.Label(label="No markdown files", xalign=0)
+            lbl.set_margin_top(8)
+            lbl.set_margin_bottom(8)
+            lbl.set_margin_start(10)
+            lbl.set_margin_end(10)
+            lbl.get_style_context().add_class("dim-label")
+            row.add(lbl)
+            self.markdown_listbox.add(row)
+            self.markdown_listbox.show_all()
+            return
+        for f in files:
+            row = Gtk.ListBoxRow()
+            row.file_path = f
+            box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+            box.set_margin_top(6)
+            box.set_margin_bottom(6)
+            box.set_margin_start(8)
+            box.set_margin_end(8)
+            name = Gtk.Label(label=f.name, xalign=0)
+            name.set_ellipsize(Pango.EllipsizeMode.END)
+            if root:
+                try:
+                    rel = f.resolve().relative_to(root.resolve())
+                    sub_text = str(rel)
+                except ValueError:
+                    sub_text = str(f)
+            else:
+                sub_text = str(f)
+            sub = Gtk.Label(label=sub_text, xalign=0)
+            sub.set_ellipsize(Pango.EllipsizeMode.MIDDLE)
+            sub.get_style_context().add_class("dim-label")
+            box.pack_start(name, False, False, 0)
+            box.pack_start(sub, False, False, 0)
+            row.add(box)
+            self.markdown_listbox.add(row)
+        if truncated:
+            row = Gtk.ListBoxRow()
+            row.file_path = None
+            lbl = Gtk.Label(label="Scan limit reached; showing partial results.", xalign=0)
+            lbl.set_margin_top(6)
+            lbl.set_margin_bottom(6)
+            lbl.set_margin_start(10)
+            lbl.set_margin_end(10)
+            lbl.get_style_context().add_class("dim-label")
+            row.add(lbl)
+            self.markdown_listbox.add(row)
+        self.markdown_listbox.show_all()
+
+    def _on_outline_row(self, _lb, row):
         if row is not None and getattr(row, "line", None) is not None:
             self.on_jump(row.line)
+
+    def _on_history_row(self, _lb, row):
+        path = getattr(row, "file_path", None)
+        if path is not None:
+            self.on_open_history(path)
+
+    def _on_markdown_row(self, _lb, row):
+        path = getattr(row, "file_path", None)
+        if path is not None:
+            self.on_open_markdown(path)
 
 
 # --- main window -------------------------------------------------------------
@@ -376,6 +636,9 @@ class Viewer(Gtk.ApplicationWindow):
         self._history: list[tuple[Path, int]] = []
         self._history_idx: int = -1
         self._in_history_nav = False
+        self.markdown_root: Path | None = None
+        self.markdown_files: list[Path] = []
+        self.markdown_scan_truncated: bool = False
 
         self._build_header()
         self._build_editor_widgets()
@@ -385,6 +648,8 @@ class Viewer(Gtk.ApplicationWindow):
         self._build_layout()
         self._setup_shortcuts()
         self._setup_dnd()
+        self._refresh_history_sidebar()
+        self._restore_markdown_sidebar_state()
 
         if path is not None:
             self.load_file(path)
@@ -716,7 +981,13 @@ class Viewer(Gtk.ApplicationWindow):
     # ---- outline sidebar ----------------------------------------------------
 
     def _build_outline(self):
-        self.outline = OutlineSidebar(on_jump=self._goto_line)
+        self.outline = OutlineSidebar(
+            on_jump=self._goto_line,
+            on_open_history=self._open_history_file,
+            on_open_markdown=self._open_markdown_file,
+            on_choose_markdown_folder=self._choose_markdown_folder,
+            on_rescan_markdown_folder=self._scan_markdown_folder,
+        )
         self.outline_revealer = Gtk.Revealer()
         self.outline_revealer.set_transition_type(
             Gtk.RevealerTransitionType.SLIDE_RIGHT)
@@ -728,6 +999,114 @@ class Viewer(Gtk.ApplicationWindow):
         self.outline_revealer.set_reveal_child(self.outline_visible)
         if self.outline_visible:
             self.outline.update(self._headings_cache)
+
+    def _refresh_history_sidebar(self):
+        recents = [p for p in load_recents() if p.exists()]
+        self.outline.update_history(recents[:RECENT_MAX])
+
+    def _open_history_file(self, path: Path):
+        if not path.exists():
+            self._render_error(f"Could not read {path}: file not found")
+            self._refresh_history_sidebar()
+            return
+        if not self._confirm_discard_if_dirty():
+            return
+        self.load_file(path)
+
+    def _open_markdown_file(self, path: Path):
+        if not path.exists():
+            self._render_error(f"Could not read {path}: file not found")
+            return
+        if not self._confirm_discard_if_dirty():
+            return
+        self.load_file(path)
+
+    def _restore_markdown_sidebar_state(self):
+        root = load_markdown_root()
+        if root is None:
+            self.outline.set_markdown_results(
+                None,
+                [],
+                False,
+                "Choose a folder to scan markdown files.",
+            )
+            return
+        self.markdown_root = root
+        self._scan_markdown_folder()
+
+    def _choose_markdown_folder(self, *_):
+        d = Gtk.FileChooserDialog(
+            title="Choose markdown folder",
+            parent=self,
+            action=Gtk.FileChooserAction.SELECT_FOLDER,
+        )
+        d.add_buttons(
+            "Cancel",
+            Gtk.ResponseType.CANCEL,
+            "Select",
+            Gtk.ResponseType.OK,
+        )
+        if self.markdown_root and self.markdown_root.is_dir():
+            d.set_current_folder(str(self.markdown_root))
+        elif self.current_path:
+            d.set_current_folder(str(self.current_path.parent))
+        r = d.run()
+        chosen = d.get_filename() if r == Gtk.ResponseType.OK else None
+        d.destroy()
+        if not chosen:
+            return
+        self.markdown_root = Path(chosen).resolve()
+        save_markdown_root(self.markdown_root)
+        self._scan_markdown_folder()
+
+    def _scan_markdown_folder(self, *_):
+        self.markdown_files = []
+        self.markdown_scan_truncated = False
+        if self.markdown_root is None or not self.markdown_root.is_dir():
+            self.outline.set_markdown_results(
+                None,
+                [],
+                False,
+                "Choose a folder to scan markdown files.",
+            )
+            return
+        root = self.markdown_root.resolve()
+        try:
+            for dirpath, dirnames, filenames in os.walk(root):
+                dirnames[:] = [
+                    d for d in dirnames
+                    if d not in MARKDOWN_SKIP_DIRS
+                ]
+                for name in filenames:
+                    if Path(name).suffix.lower() not in MARKDOWN_EXTENSIONS:
+                        continue
+                    self.markdown_files.append(Path(dirpath) / name)
+                    if len(self.markdown_files) >= MARKDOWN_SCAN_MAX:
+                        self.markdown_scan_truncated = True
+                        break
+                if self.markdown_scan_truncated:
+                    break
+            self.markdown_files.sort(key=lambda p: str(p).lower())
+        except OSError as exc:
+            self.outline.set_markdown_results(
+                root,
+                [],
+                False,
+                f"Scan failed: {exc}",
+            )
+            return
+
+        count = len(self.markdown_files)
+        if self.markdown_scan_truncated:
+            status = f"Showing first {count} files (scan limit reached)."
+        else:
+            status = f"Found {count} markdown files."
+        self.outline.set_markdown_results(
+            root,
+            self.markdown_files,
+            self.markdown_scan_truncated,
+            status,
+        )
 
     # ---- layout -------------------------------------------------------------
 
@@ -871,6 +1250,8 @@ class Viewer(Gtk.ApplicationWindow):
         self.current_path = path
         self.is_untitled = False
         self.edit_btn.set_sensitive(True)
+        add_recent(path)
+        self._refresh_history_sidebar()
         base_uri = path.parent.as_uri() + "/"
         self.webview.load_html(
             render(
@@ -1968,6 +2349,8 @@ class Viewer(Gtk.ApplicationWindow):
             return False
         self.current_path = p
         self.is_untitled = False
+        add_recent(p)
+        self._refresh_history_sidebar()
         self._watch_file(p)
         self._update_title()
         return True

@@ -250,6 +250,21 @@ li:has(> input.mv-task) {
   margin-left: -22px;
 }
 
+/* print */
+@media print {
+  html, body { background: #fff !important; color: #000 !important; }
+  .markdown-body { max-width: 100%; padding: 0 12mm; }
+  a { color: #000; text-decoration: underline; }
+  pre, code, .codehilite {
+    background: transparent !important;
+    border: 1px solid #999 !important;
+    color: #000 !important;
+  }
+  input.mv-task { border-color: #000; }
+  input.mv-task:checked { background: #000; border-color: #000; }
+  h1, h2 { border-color: #999; }
+}
+
 /* scrollbars */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb {

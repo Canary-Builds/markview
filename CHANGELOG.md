@@ -6,6 +6,48 @@ versioning follows [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-04-13
+
+### Added (17 new features — all keyboard-activated, no new visible chrome)
+
+**Navigation**
+- **Outline sidebar** — `Ctrl+Shift+O` reveals a slide-in panel listing every heading with click-to-jump.
+- **Back/forward navigation** — `Alt+←` / `Alt+→` walks a history stack of (file, cursor line) populated automatically on opens and palette jumps.
+
+**Editing**
+- **Smart paste** — `Ctrl+V` picks the right thing per clipboard contents: image (saved to `./assets/`), HTML (converted to markdown via `html2text` or built-in fallback), CSV/TSV (converted to a markdown table), or plain text.
+- **Smart list continuation** — `Enter` at the end of `- `, `1. `, or `- [ ] ` auto-inserts the next bullet/number/task; `Enter` on an empty one exits the list.
+- **Block move** — `Alt+↑` / `Alt+↓` moves the current line (or selected lines) as a unit.
+
+**Preview & output**
+- **KaTeX math** rendered in the preview — supports `$...$`, `$$...$$`, `\(...\)`, `\[...\]` delimiters via KaTeX auto-render (CDN).
+- **Mermaid diagrams** — fenced ```mermaid blocks render as live diagrams.
+- **Transclusion** — `![[other-note]]` or `![[other-note#Section]]` in a document inlines the target file (or a section of it) into the preview; max 4-level depth, fenced-code-aware.
+- **Print stylesheet** — `@media print` rules for clean, high-contrast output.
+- **Custom preview CSS** — drop a file at `~/.config/markview/custom.css` and it's appended to the rendered style on every load.
+
+**Palette actions (`Ctrl+P`)**
+- **Open from URL…** — fetches the URL, converts HTML → markdown if the response is HTML, opens as an untitled buffer.
+- **Insert table…** — prompt for rows × columns, inserts a skeleton markdown table.
+- **Show all tasks in folder…** — palette view of every `- [ ]` / `- [x]` across the folder; Enter jumps to the task.
+- **Show backlinks to this file** — scans the folder for `[text](this-file.md)` and `[[this-file]]` references and lists them.
+- **Check links in current buffer** — flags relative links/images whose targets don't exist on disk.
+- **View snapshot history…** — opens any of the last 30 auto-saved snapshots in preview.
+- **Export as PDF / DOCX / HTML / EPUB (via pandoc)** — shells out to `pandoc` when present; clear error if not installed.
+
+**Craft**
+- **Typewriter mode** — `Ctrl+Shift+T` toggles vertical-center cursor behavior.
+- **Word count + reading time** — small dim label on the far right of the edit toolbar (hidden when no doc is open).
+
+**Persistence**
+- **Snapshot on save** — each `_write_to` also drops a copy into `~/.local/state/markview/snapshots/<hash>-<stem>/<timestamp>.md`. Keeps the latest 30 per document.
+
+### Deferred
+- Vim keybindings
+- Full spreadsheet-style table editor (only the `Insert table…` prompt ships)
+- LanguageTool grammar integration (spell-check was not available via stock GTK3 in this release)
+- Front-matter as a structured form (raw YAML remains in the editor)
+
 ## [0.4.0] — 2026-04-13
 
 ### Added

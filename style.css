@@ -212,6 +212,44 @@ kbd {
 
 .toc ul { padding-left: 1.2em; }
 
+/* task checkboxes — interactive in preview */
+input.mv-task {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  margin: 0 6px 0 -22px;
+  vertical-align: middle;
+  border: 1.5px solid var(--muted);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 120ms, border-color 120ms;
+}
+
+input.mv-task:hover { border-color: var(--accent); }
+
+input.mv-task:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+input.mv-task:checked::after {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 8px;
+  margin: 0 auto;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) translate(-1px, -1px);
+}
+
+li:has(> input.mv-task) {
+  list-style: none;
+  margin-left: -22px;
+}
+
 /* scrollbars */
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-thumb {

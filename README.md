@@ -15,8 +15,15 @@ Minimal, modern markdown viewer + editor for Linux. GTK3 + WebKit + GtkSourceVie
 - Full edit toolbar: **New / Save / Save As / Undo / Redo / Cut / Copy / Paste**
 - Markdown formatting buttons: **Bold, Italic, Strikethrough, Heading, Link, Code, Quote, Lists, Checklist, Image, Horizontal rule**
 - **Split view** with live preview — type on the left, watch the render update on the right
+- **Semantic scroll-sync** — in split view, the preview follows the editor cursor by heading
+- **Paste an image** — `Ctrl+V` saves the clipboard image to `./assets/` and inserts a relative `![](...)`
 - Find bar with next / previous (Ctrl+F)
 - GtkSourceView editor with markdown syntax highlighting + undo history
+
+### Navigation
+- **Command palette** (`Ctrl+P`) — fuzzy jump to actions, headings, or files in the folder
+- **Folder search** (`Ctrl+Shift+F`) — recursive full-text search with context snippets
+- **Click checkboxes in preview** — toggles `- [ ]` / `- [x]` in the source
 
 ## Run
 
@@ -47,7 +54,7 @@ sudo apt install python3-gi gir1.2-gtk-3.0 gir1.2-webkit2-4.1 \
 
 ## Shortcuts
 
-### File / view
+### File / view / nav
 | Key | Action |
 |---|---|
 | `Ctrl+O` | Open file |
@@ -56,8 +63,10 @@ sudo apt install python3-gi gir1.2-gtk-3.0 gir1.2-webkit2-4.1 \
 | `Ctrl+Shift+S` | Save As |
 | `Ctrl+R` | Reload current file |
 | `Ctrl+E` | Toggle edit mode |
+| `Ctrl+P` | Command palette (actions · headings · files) |
+| `Ctrl+F` | Find in current buffer (edit mode) |
+| `Ctrl+Shift+F` | Search in folder |
 | `Ctrl+D` | Toggle light/dark |
-| `Ctrl+F` | Find (in edit mode) |
 | `Ctrl+Q` | Quit |
 | Drop `.md` | Open the dropped file |
 

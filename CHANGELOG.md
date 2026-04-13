@@ -6,6 +6,20 @@ versioning follows [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-04-13
+
+### Added
+- **Command palette** (`Ctrl+P`) — a borderless fuzzy-filter popup over actions, headings in the current document, and markdown files in the current folder. Arrow keys navigate, Enter activates, Esc dismisses.
+- **Folder-wide full-text search** (`Ctrl+Shift+F`) — recursive `.md` search with context snippets; selecting a result opens the file and jumps to the line. Skips `.git`, `node_modules`, `.venv`, `__pycache__`.
+- **Semantic scroll-sync** — in Split view, the preview scrolls to the heading containing the editor cursor. Debounced 80 ms.
+- **Interactive checkboxes in preview** — click a rendered `- [ ]` / `- [x]` to toggle it. Round-trips to the buffer (edit mode) or the file on disk (preview mode) via a WebKit ↔ Python message bridge; self-saves suppress the file-monitor reload.
+- **Paste image → `./assets/`** — pasting an image (`Ctrl+V`) in the editor writes a timestamped PNG to `<doc>/assets/` and inserts a relative `![](...)` link. Untitled buffers use `~/Pictures/markview/` with an absolute path.
+
+### Notes
+- No new toolbar buttons — every new feature is keyboard-only to keep the chrome minimal.
+- Palette window is borderless, modal to the main window, closes on focus-out or Esc.
+- Source-line markers on checkboxes are injected via a markdown preprocessor that respects fenced code (task syntax inside code blocks is left alone).
+
 ## [0.3.1] — 2026-04-13
 
 ### Fixed

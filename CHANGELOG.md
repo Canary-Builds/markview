@@ -6,6 +6,11 @@ versioning follows [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.1] — 2026-04-13
+
+### Fixed
+- Replaced deprecated `Gtk.Widget.override_font` with a `GtkCssProvider` targeting the editor `textview`. Quiets the runtime `DeprecationWarning` and the editor font is now applied via CSS.
+
 ## [0.3.0] — 2026-04-13
 
 ### Added

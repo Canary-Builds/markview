@@ -10,12 +10,12 @@ import gi
 gi.require_version("Gtk", "3.0")
 gi.require_version("WebKit2", "4.1")
 gi.require_version("GtkSource", "4")
-from gi.repository import Gtk, WebKit2, Gio, GLib, Gdk, GtkSource, Pango  # noqa: E402
+from gi.repository import Gtk, WebKit2, Gio, GLib, Gdk, GtkSource  # noqa: E402
 
 import markdown  # noqa: E402
 from pygments.formatters import HtmlFormatter  # noqa: E402
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 APP_ID = "dev.markview.Viewer"
 APP_NAME = "markview"
@@ -236,8 +236,7 @@ class Viewer(Gtk.ApplicationWindow):
         self.editor.set_right_margin(16)
         self.editor.set_top_margin(14)
         self.editor.set_bottom_margin(120)
-        self.editor.override_font(Pango.FontDescription("JetBrains Mono 10"))
-
+        self._apply_editor_font()
         self._apply_source_style()
 
         self.editor_scroller = Gtk.ScrolledWindow()
@@ -248,6 +247,15 @@ class Viewer(Gtk.ApplicationWindow):
         self.search_settings.set_wrap_around(True)
         self.search_settings.set_case_sensitive(False)
         self.search_context = GtkSource.SearchContext.new(self.editor_buffer, self.search_settings)
+
+    def _apply_editor_font(self):
+        provider = Gtk.CssProvider()
+        provider.load_from_data(
+            b"textview { font-family: 'JetBrains Mono','Fira Code',"
+            b"'DejaVu Sans Mono',monospace; font-size: 10.5pt; }"
+        )
+        ctx = self.editor.get_style_context()
+        ctx.add_provider(provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
     def _apply_source_style(self):
         scheme_mgr = GtkSource.StyleSchemeManager.get_default()

@@ -20,7 +20,8 @@ from pathlib import Path
 import gi
 gi.require_version("Gtk", "3.0")
 gi.require_version("WebKit2", "4.1")
-# Flathub GNOME runtimes expose GtkSource 5, while Debian/Ubuntu commonly ship 4.
+# Flathub GNOME runtimes expose GtkSource 5, while Debian/Ubuntu commonly
+# ship 4.
 try:
     gi.require_version("GtkSource", "5")
 except ValueError:
@@ -42,8 +43,14 @@ APP_ID = "dev.markview.Viewer"
 APP_NAME = "markview"
 APP_DIR = Path(__file__).resolve().parent
 STYLE_PATH = APP_DIR / "style.css"
-CONFIG_DIR = Path(os.environ.get("XDG_CONFIG_HOME", str(Path.home() / ".config"))) / "markview"
-STATE_DIR = Path(os.environ.get("XDG_STATE_HOME", str(Path.home() / ".local/state"))) / "markview"
+CONFIG_DIR = Path(
+    os.environ.get(
+        "XDG_CONFIG_HOME", str(
+            Path.home() / ".config"))) / "markview"
+STATE_DIR = Path(
+    os.environ.get(
+        "XDG_STATE_HOME", str(
+            Path.home() / ".local/state"))) / "markview"
 CUSTOM_CSS_PATH = CONFIG_DIR / "custom.css"
 SNAPSHOT_DIR = STATE_DIR / "snapshots"
 LAST_SHOWN_VERSION_PATH = STATE_DIR / "last-shown-version"
@@ -75,7 +82,8 @@ HEADING_RE = re.compile(r"^(#{1,6})\s+(.+?)\s*#*\s*$")
 FENCE_RE = re.compile(r"^\s*```")
 LIST_BULLET_RE = re.compile(r"^(\s*)([-*+])\s+(\[[ xX]\]\s+)?(.*)$")
 LIST_ORDERED_RE = re.compile(r"^(\s*)(\d+)\.\s+(.*)$")
-TRANSCLUDE_RE = re.compile(r"^(\s*)!\[\[([^\]|#]+?)(?:#([^\]|]+))?(?:\|[^\]]*)?\]\]\s*$")
+TRANSCLUDE_RE = re.compile(
+    r"^(\s*)!\[\[([^\]|#]+?)(?:#([^\]|]+))?(?:\|[^\]]*)?\]\]\s*$")
 MD_LINK_RE = re.compile(r"(!?)\[([^\]]*)\]\(([^)]+)\)")
 WIKI_LINK_RE = re.compile(r"\[\[([^\]|#]+?)(?:#[^\]|]+)?(?:\|[^\]]*)?\]\]")
 MATH_BLOCK_RE = re.compile(r"^\$\$.*\$\$\s*$", re.DOTALL)
@@ -177,7 +185,8 @@ def preprocess_tasks(text: str) -> str:
     for i, line in enumerate(text.split("\n")):
         if FENCE_RE.match(line):
             in_fence = not in_fence
-            out.append(line); continue
+            out.append(line)
+            continue
         if not in_fence:
             m = TASK_LINE_RE.match(line)
             if m:
@@ -190,7 +199,10 @@ def preprocess_tasks(text: str) -> str:
     return "\n".join(out)
 
 
-def preprocess_transclusions(text: str, current_dir: Path | None, depth: int = 0) -> str:
+def preprocess_transclusions(
+        text: str,
+        current_dir: Path | None,
+        depth: int = 0) -> str:
     """Resolve `![[other.md]]` / `![[other.md#Section]]` by inlining the target."""
     if depth > 4 or current_dir is None:
         return text
@@ -198,12 +210,16 @@ def preprocess_transclusions(text: str, current_dir: Path | None, depth: int = 0
     out = []
     for line in text.split("\n"):
         if FENCE_RE.match(line):
-            in_fence = not in_fence; out.append(line); continue
+            in_fence = not in_fence
+            out.append(line)
+            continue
         if in_fence:
-            out.append(line); continue
+            out.append(line)
+            continue
         m = TRANSCLUDE_RE.match(line)
         if not m:
-            out.append(line); continue
+            out.append(line)
+            continue
         indent, target, anchor = m.groups()
         candidates = [current_dir / target, current_dir / f"{target}.md"]
         loaded = None
@@ -219,7 +235,8 @@ def preprocess_transclusions(text: str, current_dir: Path | None, depth: int = 0
             continue
         if anchor:
             loaded = _extract_section(loaded, anchor)
-        loaded = preprocess_transclusions(loaded, candidates[0].parent if candidates else current_dir, depth + 1)
+        loaded = preprocess_transclusions(
+            loaded, candidates[0].parent if candidates else current_dir, depth + 1)
         out.append(loaded)
     return "\n".join(out)
 
@@ -251,7 +268,8 @@ def extract_headings(text: str) -> list[dict]:
     in_fence = False
     for i, line in enumerate(text.split("\n")):
         if FENCE_RE.match(line):
-            in_fence = not in_fence; continue
+            in_fence = not in_fence
+            continue
         if in_fence:
             continue
         m = HEADING_RE.match(line)
@@ -358,10 +376,13 @@ MERMAID_TAG = (
 )
 
 
-def render(md_text: str, theme: str, title: str, base_dir: Path | None = None) -> str:
+def render(md_text: str, theme: str, title: str,
+           base_dir: Path | None = None) -> str:
     source = preprocess_transclusions(md_text, base_dir)
     source = preprocess_tasks(source)
-    md = markdown.Markdown(extensions=MD_EXTENSIONS, extension_configs=MD_EXTENSION_CONFIGS)
+    md = markdown.Markdown(
+        extensions=MD_EXTENSIONS,
+        extension_configs=MD_EXTENSION_CONFIGS)
     body = md.convert(source)
     return (
         f"<!DOCTYPE html>\n"
@@ -450,6 +471,7 @@ def csv_to_markdown_table(text: str, sep: str) -> str:
     for r in cells:
         while len(r) < width:
             r.append("")
+
     def fmt(r):
         return "| " + " | ".join(c.replace("|", r"\|") for c in r) + " |"
     header = fmt(cells[0])
@@ -479,7 +501,8 @@ def _toggle_icon(icon_name, tooltip):
 
 def _separator():
     sep = Gtk.Separator(orientation=Gtk.Orientation.VERTICAL)
-    sep.set_margin_start(4); sep.set_margin_end(4)
+    sep.set_margin_start(4)
+    sep.set_margin_end(4)
     return sep
 
 
@@ -492,12 +515,15 @@ def _menu_button(icon_name, tooltip, items):
     btn.get_style_context().add_class("flat")
     popover = Gtk.Popover()
     box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
-    box.set_margin_top(4); box.set_margin_bottom(4)
-    box.set_margin_start(4); box.set_margin_end(4)
+    box.set_margin_top(4)
+    box.set_margin_bottom(4)
+    box.set_margin_start(4)
+    box.set_margin_end(4)
     for entry in items:
         if entry is None:
             sep = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
-            sep.set_margin_top(4); sep.set_margin_bottom(4)
+            sep.set_margin_top(4)
+            sep.set_margin_bottom(4)
             box.pack_start(sep, False, False, 0)
             continue
         label, callback = entry
@@ -514,20 +540,32 @@ def _menu_button(icon_name, tooltip, items):
 # --- command palette ---------------------------------------------------------
 
 class CommandPalette(Gtk.Window):
-    def __init__(self, parent, provider, on_select, placeholder="Type to filter…",
-                 min_query_chars=0, initial_query=""):
+    def __init__(
+            self,
+            parent,
+            provider,
+            on_select,
+            placeholder="Type to filter…",
+            min_query_chars=0,
+            initial_query=""):
         super().__init__(type=Gtk.WindowType.TOPLEVEL)
-        self.set_decorated(False); self.set_transient_for(parent)
-        self.set_modal(True); self.set_destroy_with_parent(True)
+        self.set_decorated(False)
+        self.set_transient_for(parent)
+        self.set_modal(True)
+        self.set_destroy_with_parent(True)
         self.set_skip_taskbar_hint(True)
         self.set_position(Gtk.WindowPosition.CENTER_ON_PARENT)
-        self.set_default_size(680, 460); self.set_resizable(False)
-        self.provider = provider; self.on_select = on_select
+        self.set_default_size(680, 460)
+        self.set_resizable(False)
+        self.provider = provider
+        self.on_select = on_select
         self.min_query_chars = min_query_chars
 
         outer = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
-        outer.set_margin_top(10); outer.set_margin_bottom(10)
-        outer.set_margin_start(10); outer.set_margin_end(10)
+        outer.set_margin_top(10)
+        outer.set_margin_bottom(10)
+        outer.set_margin_start(10)
+        outer.set_margin_end(10)
         self.entry = Gtk.SearchEntry()
         self.entry.set_placeholder_text(placeholder)
         if initial_query:
@@ -539,9 +577,13 @@ class CommandPalette(Gtk.Window):
 
         self.listbox = Gtk.ListBox()
         self.listbox.set_activate_on_single_click(True)
-        self.listbox.connect("row-activated", lambda _lb, row: self._select_row(row))
+        self.listbox.connect(
+            "row-activated",
+            lambda _lb,
+            row: self._select_row(row))
         scroller = Gtk.ScrolledWindow()
-        scroller.set_hexpand(True); scroller.set_vexpand(True)
+        scroller.set_hexpand(True)
+        scroller.set_vexpand(True)
         scroller.add(self.listbox)
         outer.pack_start(scroller, True, True, 0)
         self.add(outer)
@@ -570,14 +612,18 @@ class CommandPalette(Gtk.Window):
         row = Gtk.ListBoxRow()
         row.item_key = item.get("key")
         vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
-        vbox.set_margin_top(4); vbox.set_margin_bottom(4)
-        vbox.set_margin_start(6); vbox.set_margin_end(6)
+        vbox.set_margin_top(4)
+        vbox.set_margin_bottom(4)
+        vbox.set_margin_start(6)
+        vbox.set_margin_end(6)
         lbl = Gtk.Label(label=item["label"], xalign=0)
-        lbl.set_ellipsize(Pango.EllipsizeMode.END); vbox.pack_start(lbl, False, False, 0)
+        lbl.set_ellipsize(Pango.EllipsizeMode.END)
+        vbox.pack_start(lbl, False, False, 0)
         if item.get("sub"):
             sub = Gtk.Label(label=item["sub"], xalign=0)
             sub.get_style_context().add_class("dim-label")
-            sub.set_ellipsize(Pango.EllipsizeMode.END); vbox.pack_start(sub, False, False, 0)
+            sub.set_ellipsize(Pango.EllipsizeMode.END)
+            vbox.pack_start(sub, False, False, 0)
         row.add(vbox)
         return row
 
@@ -597,19 +643,22 @@ class CommandPalette(Gtk.Window):
             idx = cur.get_index() if cur else -1
             idx += 1 if event.keyval == Gdk.KEY_Down else -1
             total = len(self.listbox.get_children())
-            if not total: return True
+            if not total:
+                return True
             idx = max(0, min(idx, total - 1))
             new_row = self.listbox.get_row_at_index(idx)
             if new_row:
                 self.listbox.select_row(new_row)
             return True
         if event.keyval == Gdk.KEY_Return:
-            self._activate_selected(); return True
+            self._activate_selected()
+            return True
         return False
 
     def _on_window_key(self, _w, event):
         if event.keyval == Gdk.KEY_Escape:
-            self.destroy(); return True
+            self.destroy()
+            return True
         return False
 
 
@@ -621,14 +670,21 @@ class OutlineSidebar(Gtk.Box):
         self.set_size_request(240, -1)
         self.on_jump = on_jump
         header = Gtk.Label(label="Outline", xalign=0)
-        header.set_margin_top(8); header.set_margin_start(12); header.set_margin_bottom(4)
+        header.set_margin_top(8)
+        header.set_margin_start(12)
+        header.set_margin_bottom(4)
         header.get_style_context().add_class("dim-label")
         self.pack_start(header, False, False, 0)
         self.listbox = Gtk.ListBox()
         self.listbox.set_activate_on_single_click(True)
-        self.listbox.connect("row-activated", lambda _lb, row: self._on_row(row))
+        self.listbox.connect(
+            "row-activated",
+            lambda _lb,
+            row: self._on_row(row))
         scroller = Gtk.ScrolledWindow()
-        scroller.set_hexpand(False); scroller.set_vexpand(True); scroller.add(self.listbox)
+        scroller.set_hexpand(False)
+        scroller.set_vexpand(True)
+        scroller.add(self.listbox)
         self.pack_start(scroller, True, True, 0)
         self.pack_start(Gtk.Separator(orientation=Gtk.Orientation.VERTICAL),
                         False, False, 0)
@@ -642,8 +698,10 @@ class OutlineSidebar(Gtk.Box):
             indent = "  " * (h["level"] - 1)
             lbl = Gtk.Label(label=f"{indent}{h['title']}", xalign=0)
             lbl.set_ellipsize(Pango.EllipsizeMode.END)
-            lbl.set_margin_start(10); lbl.set_margin_end(10)
-            lbl.set_margin_top(3); lbl.set_margin_bottom(3)
+            lbl.set_margin_start(10)
+            lbl.set_margin_end(10)
+            lbl.set_margin_top(3)
+            lbl.set_margin_bottom(3)
             row.add(lbl)
             self.listbox.add(row)
         self.listbox.show_all()
@@ -709,8 +767,10 @@ class Viewer(Gtk.ApplicationWindow):
 
     def _toggle_theme(self, *_):
         self.theme = "dark" if self.theme == "light" else "light"
-        self.theme_btn.set_image(Gtk.Image.new_from_icon_name(self._theme_icon(),
-                                                              Gtk.IconSize.BUTTON))
+        self.theme_btn.set_image(
+            Gtk.Image.new_from_icon_name(
+                self._theme_icon(),
+                Gtk.IconSize.BUTTON))
         self._apply_source_style()
         self._refresh_preview()
 
@@ -722,14 +782,22 @@ class Viewer(Gtk.ApplicationWindow):
         header.props.title = APP_NAME
         self.header = header
         self.set_titlebar(header)
-        header.pack_start(_icon_button("document-open-symbolic", "Open (Ctrl+O)",
-                                       self._on_open_clicked))
-        self.edit_btn = _toggle_icon("document-edit-symbolic", "Edit mode (Ctrl+E)")
+        header.pack_start(
+            _icon_button(
+                "document-open-symbolic",
+                "Open (Ctrl+O)",
+                self._on_open_clicked))
+        self.edit_btn = _toggle_icon(
+            "document-edit-symbolic",
+            "Edit mode (Ctrl+E)")
         self.edit_btn.set_sensitive(False)
         self.edit_btn.connect("toggled", self._on_edit_toggled)
         header.pack_start(self.edit_btn)
-        header.pack_start(_icon_button("view-refresh-symbolic", "Reload (Ctrl+R)",
-                                       lambda *_: self._reload()))
+        header.pack_start(
+            _icon_button(
+                "view-refresh-symbolic",
+                "Reload (Ctrl+R)",
+                lambda *_: self._reload()))
         # Right side: hamburger (rightmost) → theme to its left
         header.pack_end(self._build_menu())
         self.theme_btn = _icon_button(self._theme_icon(), "Theme (Ctrl+D)",
@@ -738,14 +806,14 @@ class Viewer(Gtk.ApplicationWindow):
 
     def _build_menu(self):
         return _menu_button("open-menu-symbolic", "Menu", [
-            ("Keyboard Shortcuts",  self._show_shortcuts),
+            ("Keyboard Shortcuts", self._show_shortcuts),
             (f"What’s New in {__version__}", self._show_whats_new),
             None,
-            ("Documentation",       lambda: self._open_url(WIKI_URL)),
-            ("Report an Issue",     lambda: self._open_url(ISSUES_URL)),
-            (f"Visit {DEVELOPER}",  lambda: self._open_url(WEBSITE)),
+            ("Documentation", lambda: self._open_url(WIKI_URL)),
+            ("Report an Issue", lambda: self._open_url(ISSUES_URL)),
+            (f"Visit {DEVELOPER}", lambda: self._open_url(WEBSITE)),
             None,
-            (f"About {APP_NAME}",   self._show_about),
+            (f"About {APP_NAME}", self._show_about),
         ])
 
     # ---- editor widgets -----------------------------------------------------
@@ -753,7 +821,9 @@ class Viewer(Gtk.ApplicationWindow):
     def _build_editor_widgets(self):
         ucm = WebKit2.UserContentManager()
         ucm.register_script_message_handler("markview")
-        ucm.connect("script-message-received::markview", self._on_script_message)
+        ucm.connect(
+            "script-message-received::markview",
+            self._on_script_message)
         self._ucm = ucm
         self.webview = WebKit2.WebView.new_with_user_content_manager(ucm)
         ws = self.webview.get_settings()
@@ -770,8 +840,12 @@ class Viewer(Gtk.ApplicationWindow):
         self.editor_buffer.set_highlight_matching_brackets(False)
         self.editor_buffer.set_max_undo_levels(500)
         self.editor_buffer.connect("changed", self._on_buffer_changed)
-        self.editor_buffer.connect("modified-changed", self._on_modified_changed)
-        self.editor_buffer.connect("notify::cursor-position", self._on_cursor_position)
+        self.editor_buffer.connect(
+            "modified-changed",
+            self._on_modified_changed)
+        self.editor_buffer.connect(
+            "notify::cursor-position",
+            self._on_cursor_position)
 
         self.editor = GtkSource.View.new_with_buffer(self.editor_buffer)
         self.editor.set_monospace(True)
@@ -782,8 +856,10 @@ class Viewer(Gtk.ApplicationWindow):
         self.editor.set_indent_width(2)
         self.editor.set_insert_spaces_instead_of_tabs(True)
         self.editor.set_tab_width(2)
-        self.editor.set_left_margin(16); self.editor.set_right_margin(16)
-        self.editor.set_top_margin(14); self.editor.set_bottom_margin(120)
+        self.editor.set_left_margin(16)
+        self.editor.set_right_margin(16)
+        self.editor.set_top_margin(14)
+        self.editor.set_bottom_margin(120)
         self.editor.connect("key-press-event", self._on_editor_keypress)
 
         self._apply_editor_font()
@@ -809,8 +885,8 @@ class Viewer(Gtk.ApplicationWindow):
 
     def _apply_source_style(self):
         mgr = GtkSource.StyleSchemeManager.get_default()
-        s = mgr.get_scheme("oblivion" if self.theme == "dark" else "solarized-light") \
-            or mgr.get_scheme("classic")
+        s = mgr.get_scheme("oblivion" if self.theme ==
+                           "dark" else "solarized-light") or mgr.get_scheme("classic")
         if s is not None:
             self.editor_buffer.set_style_scheme(s)
 
@@ -818,12 +894,15 @@ class Viewer(Gtk.ApplicationWindow):
 
     def _build_edit_toolbar(self):
         bar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
-        bar.set_margin_start(8); bar.set_margin_end(8)
-        bar.set_margin_top(4); bar.set_margin_bottom(4)
+        bar.set_margin_start(8)
+        bar.set_margin_end(8)
+        bar.set_margin_top(4)
+        bar.set_margin_bottom(4)
 
         def add(b): bar.pack_start(b, False, False, 0)
 
-        # File: New, Save (Save As + clipboard live in the palette / Ctrl-shortcuts)
+        # File: New, Save (Save As + clipboard live in the palette /
+        # Ctrl-shortcuts)
         add(_icon_button("document-new-symbolic", "New (Ctrl+N)", self._on_new))
         add(_icon_button("document-save-symbolic",
                          "Save (Ctrl+S) · Save As: Ctrl+Shift+S",
@@ -852,28 +931,39 @@ class Viewer(Gtk.ApplicationWindow):
         add(_menu_button("format-text-underline-symbolic",
                          "Headings, quote, rule",
                          [
-                             ("Heading 1",       lambda: self._set_heading_level(1)),
-                             ("Heading 2",       lambda: self._set_heading_level(2)),
-                             ("Heading 3",       lambda: self._set_heading_level(3)),
-                             ("Heading 4",       lambda: self._set_heading_level(4)),
-                             ("Clear heading",   lambda: self._set_heading_level(0)),
+                             ("Heading 1", lambda: self._set_heading_level(1)),
+                             ("Heading 2", lambda: self._set_heading_level(2)),
+                             ("Heading 3", lambda: self._set_heading_level(3)),
+                             ("Heading 4", lambda: self._set_heading_level(4)),
+                             ("Clear heading", lambda: self._set_heading_level(0)),
                              None,
-                             ("Quote",           lambda: self._prefix_line("> ", toggle=True)),
+                             ("Quote", lambda: self._prefix_line("> ", toggle=True)),
                              ("Horizontal rule", lambda: self._insert_text("\n---\n")),
                          ]))
-        add(_menu_button("view-list-symbolic", "Lists",
-                         [
-                             ("Bulleted list",   lambda: self._prefix_line("- ", toggle=True)),
-                             ("Numbered list",   lambda: self._prefix_line("1. ", toggle=True)),
-                             ("Checklist item",  lambda: self._prefix_line("- [ ] ", toggle=True)),
-                         ]))
-        add(_menu_button("insert-object-symbolic", "Insert",
-                         [
-                             ("Image…",          lambda: self._insert_image()),
-                             ("Table…",          lambda: self._insert_table_prompt()),
+        add(_menu_button("view-list-symbolic",
+                         "Lists",
+                         [("Bulleted list",
+                           lambda: self._prefix_line("- ",
+                                                     toggle=True)),
+                          ("Numbered list",
+                           lambda: self._prefix_line("1. ",
+                                                     toggle=True)),
+                             ("Checklist item",
+                              lambda: self._prefix_line("- [ ] ",
+                                                        toggle=True)),
+                          ]))
+        add(_menu_button("insert-object-symbolic",
+                         "Insert",
+                         [("Image…",
+                           lambda: self._insert_image()),
+                          ("Table…",
+                           lambda: self._insert_table_prompt()),
                              None,
-                             ("Strikethrough",   lambda: self._wrap_selection("~~", "~~", "strikethrough")),
-                         ]))
+                             ("Strikethrough",
+                              lambda: self._wrap_selection("~~",
+                                                           "~~",
+                                                           "strikethrough")),
+                          ]))
 
         # Spacer
         bar.pack_start(Gtk.Box(), True, True, 0)
@@ -887,15 +977,27 @@ class Viewer(Gtk.ApplicationWindow):
         # View segmented (Editor / Split / Preview)
         view_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
         view_box.get_style_context().add_class("linked")
-        self.view_editor_btn = _toggle_icon("accessories-text-editor-symbolic", "Editor only")
-        self.view_split_btn = _toggle_icon("view-dual-symbolic", "Split view (live preview)")
-        self.view_preview_btn = _toggle_icon("view-reveal-symbolic", "Preview only")
+        self.view_editor_btn = _toggle_icon(
+            "accessories-text-editor-symbolic", "Editor only")
+        self.view_split_btn = _toggle_icon(
+            "view-dual-symbolic", "Split view (live preview)")
+        self.view_preview_btn = _toggle_icon(
+            "view-reveal-symbolic", "Preview only")
         self.view_editor_btn.set_active(True)
-        for b in (self.view_editor_btn, self.view_split_btn, self.view_preview_btn):
+        for b in (
+            self.view_editor_btn,
+            self.view_split_btn,
+                self.view_preview_btn):
             view_box.pack_start(b, False, False, 0)
-        self.view_editor_btn.connect("toggled", lambda b: self._set_edit_view("editor", b))
-        self.view_split_btn.connect("toggled", lambda b: self._set_edit_view("split", b))
-        self.view_preview_btn.connect("toggled", lambda b: self._set_edit_view("preview", b))
+        self.view_editor_btn.connect(
+            "toggled", lambda b: self._set_edit_view(
+                "editor", b))
+        self.view_split_btn.connect(
+            "toggled", lambda b: self._set_edit_view(
+                "split", b))
+        self.view_preview_btn.connect(
+            "toggled", lambda b: self._set_edit_view(
+                "preview", b))
         bar.pack_start(view_box, False, False, 0)
 
         bar.pack_start(_separator(), False, False, 0)
@@ -922,7 +1024,9 @@ class Viewer(Gtk.ApplicationWindow):
         self.find_entry.set_width_chars(48)
         self.find_entry.connect("search-changed", self._on_find_changed)
         self.find_entry.connect("activate", lambda *_: self._find_step(True))
-        self.find_entry.connect("stop-search", lambda *_: self._toggle_find(False))
+        self.find_entry.connect(
+            "stop-search",
+            lambda *_: self._toggle_find(False))
 
         inner = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
         inner.pack_start(self.find_entry, True, True, 0)
@@ -956,7 +1060,8 @@ class Viewer(Gtk.ApplicationWindow):
         self.search_settings.set_search_text(entry.get_text() or "")
 
     def _find_step(self, forward):
-        start = self.editor_buffer.get_iter_at_mark(self.editor_buffer.get_insert())
+        start = self.editor_buffer.get_iter_at_mark(
+            self.editor_buffer.get_insert())
         func = self.search_context.forward2 if forward else self.search_context.backward2
         try:
             found, ms, me, _w = func(start)
@@ -1006,9 +1111,11 @@ class Viewer(Gtk.ApplicationWindow):
             self.content_box.pack_start(self.preview_scroller, True, True, 0)
         else:
             if self.edit_view == "editor":
-                self.content_box.pack_start(self.editor_scroller, True, True, 0)
+                self.content_box.pack_start(
+                    self.editor_scroller, True, True, 0)
             elif self.edit_view == "preview":
-                self.content_box.pack_start(self.preview_scroller, True, True, 0)
+                self.content_box.pack_start(
+                    self.preview_scroller, True, True, 0)
             else:
                 paned = Gtk.Paned(orientation=Gtk.Orientation.HORIZONTAL)
                 paned.set_wide_handle(True)
@@ -1030,7 +1137,9 @@ class Viewer(Gtk.ApplicationWindow):
     # ---- shortcuts + DnD ----------------------------------------------------
 
     def _setup_shortcuts(self):
-        accel = Gtk.AccelGroup(); self.add_accel_group(accel)
+        accel = Gtk.AccelGroup()
+        self.add_accel_group(accel)
+
         def bind(key, mod, handler):
             kv = Gdk.keyval_from_name(key)
             accel.connect(kv, mod, Gtk.AccelFlags.VISIBLE,
@@ -1046,7 +1155,8 @@ class Viewer(Gtk.ApplicationWindow):
         bind("q", CTRL, self.close)
         bind("d", CTRL, self._toggle_theme)
         bind("e", CTRL, self._toggle_edit)
-        bind("f", CTRL, lambda: self._toggle_find(not self.find_bar.get_search_mode()))
+        bind("f", CTRL, lambda: self._toggle_find(
+            not self.find_bar.get_search_mode()))
         bind("f", CTRL | SHIFT, self._open_folder_search)
         bind("p", CTRL, self._open_palette)
         bind("o", CTRL | SHIFT, self._toggle_outline)
@@ -1064,13 +1174,15 @@ class Viewer(Gtk.ApplicationWindow):
     def _setup_dnd(self):
         targets = Gtk.TargetList.new([])
         targets.add_uri_targets(0)
-        self.webview.drag_dest_set(Gtk.DestDefaults.ALL, [], Gdk.DragAction.COPY)
+        self.webview.drag_dest_set(
+            Gtk.DestDefaults.ALL, [], Gdk.DragAction.COPY)
         self.webview.drag_dest_set_target_list(targets)
         self.webview.connect("drag-data-received", self._on_drag_received)
 
     def _on_drag_received(self, _w, _c, _x, _y, data, _i, _t):
         uris = data.get_uris()
-        if not uris: return
+        if not uris:
+            return
         path = Gio.File.new_for_uri(uris[0]).get_path()
         if path:
             self.load_file(Path(path))
@@ -1078,15 +1190,23 @@ class Viewer(Gtk.ApplicationWindow):
     # ---- file open / reload -------------------------------------------------
 
     def _on_open_clicked(self, *_):
-        if not self._confirm_discard_if_dirty(): return
+        if not self._confirm_discard_if_dirty():
+            return
         d = Gtk.FileChooserDialog(title="Open markdown file", parent=self,
-                                   action=Gtk.FileChooserAction.OPEN)
-        d.add_buttons("Cancel", Gtk.ResponseType.CANCEL, "Open", Gtk.ResponseType.OK)
-        md = Gtk.FileFilter(); md.set_name("Markdown")
+                                  action=Gtk.FileChooserAction.OPEN)
+        d.add_buttons(
+            "Cancel",
+            Gtk.ResponseType.CANCEL,
+            "Open",
+            Gtk.ResponseType.OK)
+        md = Gtk.FileFilter()
+        md.set_name("Markdown")
         for p in ("*.md", "*.markdown", "*.mdown", "*.mkd", "*.txt"):
             md.add_pattern(p)
         d.add_filter(md)
-        af = Gtk.FileFilter(); af.set_name("All files"); af.add_pattern("*")
+        af = Gtk.FileFilter()
+        af.set_name("All files")
+        af.add_pattern("*")
         d.add_filter(af)
         r = d.run()
         chosen = d.get_filename() if r == Gtk.ResponseType.OK else None
@@ -1102,14 +1222,21 @@ class Viewer(Gtk.ApplicationWindow):
             return
         prior_line = None
         if self.current_path and not self._in_history_nav:
-            cur = self.editor_buffer.get_iter_at_mark(self.editor_buffer.get_insert())
+            cur = self.editor_buffer.get_iter_at_mark(
+                self.editor_buffer.get_insert())
             prior_line = cur.get_line() if self.mode == "edit" else 0
             self._history_push(self.current_path, prior_line)
         self.current_path = path
         self.is_untitled = False
         self.edit_btn.set_sensitive(True)
         base_uri = path.parent.as_uri() + "/"
-        self.webview.load_html(render(text, self.theme, path.name, path.parent), base_uri)
+        self.webview.load_html(
+            render(
+                text,
+                self.theme,
+                path.name,
+                path.parent),
+            base_uri)
         self._load_editor_text(text)
         self._headings_cache = extract_headings(text)
         if self.outline_visible:
@@ -1145,7 +1272,10 @@ class Viewer(Gtk.ApplicationWindow):
         return False
 
     def _render_welcome(self):
-        self.webview.load_html(welcome_html(self.theme), APP_DIR.as_uri() + "/")
+        self.webview.load_html(
+            welcome_html(
+                self.theme),
+            APP_DIR.as_uri() + "/")
         self.edit_btn.set_sensitive(False)
         self.current_path = None
         self.is_untitled = False
@@ -1175,20 +1305,24 @@ class Viewer(Gtk.ApplicationWindow):
         self._set_mode("edit" if btn.get_active() else "preview")
 
     def _toggle_edit(self, *_):
-        if not self.edit_btn.get_sensitive(): return
+        if not self.edit_btn.get_sensitive():
+            return
         self.edit_btn.set_active(not self.edit_btn.get_active())
 
     def _ensure_edit_mode(self):
         if not self.edit_btn.get_sensitive():
-            self.is_untitled = True; self.edit_btn.set_sensitive(True)
+            self.is_untitled = True
+            self.edit_btn.set_sensitive(True)
         if not self.edit_btn.get_active():
             self.edit_btn.set_active(True)
 
     def _set_mode(self, mode):
-        if mode == self.mode: return
+        if mode == self.mode:
+            return
         if mode == "edit":
             if not self.current_path and not self.is_untitled:
-                self.edit_btn.set_active(False); return
+                self.edit_btn.set_active(False)
+                return
             self.mode = "edit"
             self._refresh_content()
             if self.edit_view != "preview":
@@ -1197,7 +1331,8 @@ class Viewer(Gtk.ApplicationWindow):
             if self.editor_buffer.get_modified():
                 if self.is_untitled or not self.current_path:
                     if not self._save_as():
-                        self.edit_btn.set_active(True); return
+                        self.edit_btn.set_active(True)
+                        return
                 else:
                     self._save()
             self.mode = "preview"
@@ -1206,10 +1341,13 @@ class Viewer(Gtk.ApplicationWindow):
                 self.load_file(self.current_path)
 
     def _set_edit_view(self, view, btn):
-        if getattr(self, "_view_switching", False): return
+        if getattr(self, "_view_switching", False):
+            return
         if not btn.get_active():
             if self.edit_view == view:
-                self._view_switching = True; btn.set_active(True); self._view_switching = False
+                self._view_switching = True
+                btn.set_active(True)
+                self._view_switching = False
             return
         self._view_switching = True
         self.edit_view = view
@@ -1269,7 +1407,7 @@ class Viewer(Gtk.ApplicationWindow):
         if self._wordcount_timer is not None:
             GLib.source_remove(self._wordcount_timer)
         self._wordcount_timer = GLib.timeout_add(WORD_COUNT_DEBOUNCE_MS,
-                                                  self._update_wordcount)
+                                                 self._update_wordcount)
 
     def _update_wordcount(self):
         self._wordcount_timer = None
@@ -1311,7 +1449,8 @@ class Viewer(Gtk.ApplicationWindow):
         self._scroll_sync_timer = None
         if not self._headings_cache:
             return False
-        cur = self.editor_buffer.get_iter_at_mark(self.editor_buffer.get_insert())
+        cur = self.editor_buffer.get_iter_at_mark(
+            self.editor_buffer.get_insert())
         ln = cur.get_line()
         slug = None
         for h in self._headings_cache:
@@ -1320,7 +1459,8 @@ class Viewer(Gtk.ApplicationWindow):
             else:
                 break
         if slug:
-            js = f"window.markview && window.markview.scrollToAnchor({json.dumps(slug)});"
+            js = f"window.markview && window.markview.scrollToAnchor({
+                json.dumps(slug)});"
             try:
                 self.webview.run_javascript(js, None, None, None)
             except Exception:
@@ -1346,7 +1486,8 @@ class Viewer(Gtk.ApplicationWindow):
         if self.mode == "edit":
             buf = self.editor_buffer
             start = buf.get_iter_at_line(line)
-            if not start: return
+            if not start:
+                return
             end = start.copy()
             if not end.ends_line():
                 end.forward_to_line_end()
@@ -1354,22 +1495,27 @@ class Viewer(Gtk.ApplicationWindow):
             nt = toggle_task_line(t, checked)
             if nt and nt != t:
                 buf.begin_user_action()
-                buf.delete(start, end); buf.insert(start, nt)
+                buf.delete(start, end)
+                buf.insert(start, nt)
                 buf.end_user_action()
         else:
-            if not self.current_path: return
+            if not self.current_path:
+                return
             try:
                 content = self.current_path.read_text(encoding="utf-8")
             except OSError:
                 return
             lines = content.split("\n")
-            if not (0 <= line < len(lines)): return
+            if not (0 <= line < len(lines)):
+                return
             new_line = toggle_task_line(lines[line], checked)
-            if new_line is None or new_line == lines[line]: return
+            if new_line is None or new_line == lines[line]:
+                return
             lines[line] = new_line
             try:
                 self._suppress_reload_until = GLib.get_monotonic_time() / 1e6 + 1.0
-                self.current_path.write_text("\n".join(lines), encoding="utf-8")
+                self.current_path.write_text(
+                    "\n".join(lines), encoding="utf-8")
             except OSError:
                 return
             self._reload()
@@ -1390,9 +1536,11 @@ class Viewer(Gtk.ApplicationWindow):
                 return True
         # Alt+Up / Alt+Down: block move
         if event.keyval == Gdk.KEY_Up and state == ALT:
-            self._move_lines(-1); return True
+            self._move_lines(-1)
+            return True
         if event.keyval == Gdk.KEY_Down and state == ALT:
-            self._move_lines(1); return True
+            self._move_lines(1)
+            return True
         return False
 
     # Smart paste: image > HTML > CSV/TSV > default
@@ -1441,12 +1589,16 @@ class Viewer(Gtk.ApplicationWindow):
         m_ord = LIST_ORDERED_RE.match(line_text)
         if m_bullet and not m_bullet.group(4).strip():
             buf.begin_user_action()
-            buf.delete(line_start, line_end); buf.insert_at_cursor("\n")
-            buf.end_user_action(); return True
+            buf.delete(line_start, line_end)
+            buf.insert_at_cursor("\n")
+            buf.end_user_action()
+            return True
         if m_ord and not m_ord.group(3).strip():
             buf.begin_user_action()
-            buf.delete(line_start, line_end); buf.insert_at_cursor("\n")
-            buf.end_user_action(); return True
+            buf.delete(line_start, line_end)
+            buf.insert_at_cursor("\n")
+            buf.end_user_action()
+            return True
         # continue list
         if m_bullet:
             indent, marker, task, _content = m_bullet.groups()
@@ -1455,7 +1607,8 @@ class Viewer(Gtk.ApplicationWindow):
                 next_marker += "[ ] "
             buf.begin_user_action()
             buf.insert_at_cursor("\n" + next_marker)
-            buf.end_user_action(); return True
+            buf.end_user_action()
+            return True
         if m_ord:
             indent, num, _content = m_ord.groups()
             try:
@@ -1464,7 +1617,8 @@ class Viewer(Gtk.ApplicationWindow):
                 nxt = 1
             buf.begin_user_action()
             buf.insert_at_cursor(f"\n{indent}{nxt}. ")
-            buf.end_user_action(); return True
+            buf.end_user_action()
+            return True
         return False
 
     def _move_lines(self, delta: int):
@@ -1473,14 +1627,17 @@ class Viewer(Gtk.ApplicationWindow):
             s, e = buf.get_selection_bounds()
         else:
             it = buf.get_iter_at_mark(buf.get_insert())
-            s = it.copy(); e = it.copy()
+            s = it.copy()
+            e = it.copy()
         s.set_line_offset(0)
         if not e.ends_line():
             e.forward_to_line_end()
         first, last = s.get_line(), e.get_line()
         total_lines = buf.get_line_count()
-        if delta < 0 and first == 0: return
-        if delta > 0 and last >= total_lines - 1: return
+        if delta < 0 and first == 0:
+            return
+        if delta > 0 and last >= total_lines - 1:
+            return
         block_start = buf.get_iter_at_line(first)
         block_end = buf.get_iter_at_line(last)
         if not block_end.ends_line():
@@ -1520,7 +1677,8 @@ class Viewer(Gtk.ApplicationWindow):
         except OSError:
             return False
         ts = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-        p = assets / f"image-{ts}.png"; n = 1
+        p = assets / f"image-{ts}.png"
+        n = 1
         while p.exists():
             n += 1
             p = assets / f"image-{ts}-{n}.png"
@@ -1530,7 +1688,9 @@ class Viewer(Gtk.ApplicationWindow):
             return False
         if self.current_path:
             try:
-                rel = os.path.relpath(p, self.current_path.parent).replace(os.sep, "/")
+                rel = os.path.relpath(
+                    p, self.current_path.parent).replace(
+                    os.sep, "/")
             except ValueError:
                 rel = str(p)
         else:
@@ -1556,7 +1716,8 @@ class Viewer(Gtk.ApplicationWindow):
             self._history_idx -= drop
 
     def _history_back(self, *_):
-        if self._history_idx <= 0: return
+        if self._history_idx <= 0:
+            return
         if self.current_path:
             cur_line = self.editor_buffer.get_iter_at_mark(
                 self.editor_buffer.get_insert()).get_line() if self.mode == "edit" else 0
@@ -1567,7 +1728,8 @@ class Viewer(Gtk.ApplicationWindow):
         self._navigate_to(*self._history[self._history_idx])
 
     def _history_forward(self, *_):
-        if self._history_idx + 1 >= len(self._history): return
+        if self._history_idx + 1 >= len(self._history):
+            return
         self._history_idx += 1
         self._navigate_to(*self._history[self._history_idx])
 
@@ -1592,14 +1754,22 @@ class Viewer(Gtk.ApplicationWindow):
     # ---- command palette + actions ------------------------------------------
 
     def _open_palette(self, *_):
-        CommandPalette(self, provider=self._palette_items, on_select=self._palette_select,
-                       placeholder="Jump to file, heading, or action…").show_all()
+        CommandPalette(
+            self,
+            provider=self._palette_items,
+            on_select=self._palette_select,
+            placeholder="Jump to file, heading, or action…").show_all()
 
     def _open_folder_search(self, *_):
         base = (self.current_path.parent if self.current_path else Path.cwd())
-        CommandPalette(self, provider=lambda q: self._folder_search_items(base, q),
-                       on_select=self._palette_select,
-                       placeholder=f"Search {base} …", min_query_chars=2).show_all()
+        CommandPalette(
+            self,
+            provider=lambda q: self._folder_search_items(
+                base,
+                q),
+            on_select=self._palette_select,
+            placeholder=f"Search {base} …",
+            min_query_chars=2).show_all()
 
     def _palette_items(self, q: str):
         ql = (q or "").lower().strip()
@@ -1647,7 +1817,7 @@ class Viewer(Gtk.ApplicationWindow):
                 pass
         for h in extract_headings(src):
             items.append({"label": ("#" * h["level"]) + " " + h["title"],
-                          "sub": f"heading · line {h['line']+1}",
+                          "sub": f"heading · line {h['line'] + 1}",
                           "key": f"heading:{h['line']}"})
         folder = self.current_path.parent if self.current_path else None
         if folder and folder.is_dir():
@@ -1656,7 +1826,8 @@ class Viewer(Gtk.ApplicationWindow):
             except OSError:
                 files = []
             for f in files:
-                if self.current_path and f == self.current_path: continue
+                if self.current_path and f == self.current_path:
+                    continue
                 try:
                     rel = f.relative_to(folder)
                 except ValueError:
@@ -1694,16 +1865,18 @@ class Viewer(Gtk.ApplicationWindow):
                     except ValueError:
                         rel = f
                     snip = line.strip()
-                    if len(snip) > 140: snip = snip[:140] + "…"
+                    if len(snip) > 140:
+                        snip = snip[:140] + "…"
                     results.append({"label": snip or "(empty line match)",
-                                    "sub": f"{rel}:{i+1}",
+                                    "sub": f"{rel}:{i + 1}",
                                     "key": f"file_line:{f}:{i}"})
                     if len(results) >= SEARCH_RESULT_CAP:
                         return results
         return results
 
     def _palette_select(self, key):
-        if key is None: return
+        if key is None:
+            return
         if key.startswith("action:"):
             name = key[len("action:"):]
             dispatch = {
@@ -1741,17 +1914,21 @@ class Viewer(Gtk.ApplicationWindow):
                                             self._set_edit_view("preview", self.view_preview_btn)),
             }
             fn = dispatch.get(name)
-            if fn: fn()
+            if fn:
+                fn()
             return
         if key.startswith("heading:"):
-            self._goto_line(int(key[len("heading:"):])); return
+            self._goto_line(int(key[len("heading:"):]))
+            return
         if key.startswith("file:"):
-            self.load_file(Path(key[len("file:"):])); return
+            self.load_file(Path(key[len("file:"):]))
+            return
         if key.startswith("file_line:"):
             rest = key[len("file_line:"):]
             path_str, line_str = rest.rsplit(":", 1)
             self.load_file(Path(path_str))
-            GLib.idle_add(self._goto_line, int(line_str)); return
+            GLib.idle_add(self._goto_line, int(line_str))
+            return
         if key.startswith("snapshot:"):
             p = Path(key[len("snapshot:"):])
             if p.exists():
@@ -1774,19 +1951,32 @@ class Viewer(Gtk.ApplicationWindow):
 
     def _open_from_url_prompt(self, *_):
         d = Gtk.Dialog(title="Open from URL", transient_for=self, flags=0)
-        d.add_buttons("Cancel", Gtk.ResponseType.CANCEL, "Open", Gtk.ResponseType.OK)
+        d.add_buttons(
+            "Cancel",
+            Gtk.ResponseType.CANCEL,
+            "Open",
+            Gtk.ResponseType.OK)
         d.set_default_size(520, 120)
         box = d.get_content_area()
-        e = Gtk.Entry(); e.set_placeholder_text("https://…"); e.set_activates_default(True)
-        e.set_margin_top(10); e.set_margin_bottom(10); e.set_margin_start(12); e.set_margin_end(12)
+        e = Gtk.Entry()
+        e.set_placeholder_text("https://…")
+        e.set_activates_default(True)
+        e.set_margin_top(10)
+        e.set_margin_bottom(10)
+        e.set_margin_start(12)
+        e.set_margin_end(12)
         box.pack_start(e, False, False, 0)
         d.set_default_response(Gtk.ResponseType.OK)
         d.show_all()
-        r = d.run(); url = e.get_text().strip() if r == Gtk.ResponseType.OK else ""
+        r = d.run()
+        url = e.get_text().strip() if r == Gtk.ResponseType.OK else ""
         d.destroy()
-        if not url: return
+        if not url:
+            return
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": f"{APP_NAME}/{__version__}"})
+            req = urllib.request.Request(
+                url, headers={
+                    "User-Agent": f"{APP_NAME}/{__version__}"})
             with urllib.request.urlopen(req, timeout=10) as resp:
                 raw = resp.read()
                 ctype = resp.headers.get("Content-Type", "")
@@ -1801,39 +1991,65 @@ class Viewer(Gtk.ApplicationWindow):
             text = html_to_markdown(text)
         base = APP_DIR
         title = url.rsplit("/", 1)[-1] or url
-        self.current_path = None; self.is_untitled = True
+        self.current_path = None
+        self.is_untitled = True
         self.edit_btn.set_sensitive(True)
         self._headings_cache = extract_headings(text)
         self._load_editor_text(text)
-        self.header.props.title = title; self.header.props.subtitle = f"(fetched) {url}"
-        self.webview.load_html(render(text, self.theme, title, base), base.as_uri() + "/")
+        self.header.props.title = title
+        self.header.props.subtitle = f"(fetched) {url}"
+        self.webview.load_html(
+            render(
+                text,
+                self.theme,
+                title,
+                base),
+            base.as_uri() +
+            "/")
 
     def _insert_table_prompt(self, *_):
         d = Gtk.Dialog(title="Insert table", transient_for=self, flags=0)
-        d.add_buttons("Cancel", Gtk.ResponseType.CANCEL, "Insert", Gtk.ResponseType.OK)
+        d.add_buttons(
+            "Cancel",
+            Gtk.ResponseType.CANCEL,
+            "Insert",
+            Gtk.ResponseType.OK)
         box = d.get_content_area()
         grid = Gtk.Grid(row_spacing=8, column_spacing=10)
-        grid.set_margin_top(10); grid.set_margin_bottom(10)
-        grid.set_margin_start(12); grid.set_margin_end(12)
+        grid.set_margin_top(10)
+        grid.set_margin_bottom(10)
+        grid.set_margin_start(12)
+        grid.set_margin_end(12)
         grid.attach(Gtk.Label(label="Rows:", xalign=0), 0, 0, 1, 1)
-        rows = Gtk.SpinButton.new_with_range(1, 40, 1); rows.set_value(3)
+        rows = Gtk.SpinButton.new_with_range(1, 40, 1)
+        rows.set_value(3)
         grid.attach(rows, 1, 0, 1, 1)
         grid.attach(Gtk.Label(label="Columns:", xalign=0), 0, 1, 1, 1)
-        cols = Gtk.SpinButton.new_with_range(1, 20, 1); cols.set_value(3)
+        cols = Gtk.SpinButton.new_with_range(1, 20, 1)
+        cols.set_value(3)
         grid.attach(cols, 1, 1, 1, 1)
         box.pack_start(grid, False, False, 0)
         d.set_default_response(Gtk.ResponseType.OK)
         d.show_all()
-        r = d.run(); rv = int(rows.get_value()); cv = int(cols.get_value())
+        r = d.run()
+        rv = int(rows.get_value())
+        cv = int(cols.get_value())
         d.destroy()
-        if r != Gtk.ResponseType.OK: return
-        header = "| " + " | ".join(f"Col {i+1}" for i in range(cv)) + " |"
+        if r != Gtk.ResponseType.OK:
+            return
+        header = "| " + " | ".join(f"Col {i + 1}" for i in range(cv)) + " |"
         sep = "| " + " | ".join(["---"] * cv) + " |"
-        body = "\n".join("| " + " | ".join([""] * cv) + " |" for _ in range(rv))
+        body = "\n".join(
+            "| " +
+            " | ".join(
+                [""] *
+                cv) +
+            " |" for _ in range(rv))
         self._insert_text(f"\n{header}\n{sep}\n{body}\n")
 
     def _show_tasks_palette(self, *_):
         base = self.current_path.parent if self.current_path else Path.cwd()
+
         def provider(q):
             q = (q or "").lower().strip()
             items = []
@@ -1843,14 +2059,16 @@ class Viewer(Gtk.ApplicationWindow):
                 files = []
             for f in files:
                 if any(part in (".git", "node_modules", ".venv", "__pycache__")
-                       for part in f.parts): continue
+                       for part in f.parts):
+                    continue
                 try:
                     text = f.read_text(encoding="utf-8", errors="replace")
                 except OSError:
                     continue
                 for i, line in enumerate(text.split("\n")):
                     m = TASK_LINE_RE.match(line)
-                    if not m: continue
+                    if not m:
+                        continue
                     _, box, content = m.groups()
                     status = "☑" if box.lower() == "x" else "☐"
                     label = f"{status} {content.strip()}"
@@ -1860,10 +2078,12 @@ class Viewer(Gtk.ApplicationWindow):
                         rel = f.relative_to(base)
                     except ValueError:
                         rel = f
-                    items.append({"label": label, "sub": f"{rel}:{i+1}",
+                    items.append({"label": label, "sub": f"{rel}:{i + 1}",
                                   "key": f"file_line:{f}:{i}"})
-                    if len(items) >= SEARCH_RESULT_CAP: return items
-            return items or [{"label": "No tasks found", "sub": str(base), "key": None}]
+                    if len(items) >= SEARCH_RESULT_CAP:
+                        return items
+            return items or [
+                {"label": "No tasks found", "sub": str(base), "key": None}]
         CommandPalette(self, provider=provider, on_select=self._palette_select,
                        placeholder=f"Tasks in {base} …").show_all()
 
@@ -1875,6 +2095,7 @@ class Viewer(Gtk.ApplicationWindow):
         target_name = self.current_path.name
         target_stem = self.current_path.stem
         target_abs = self.current_path.resolve()
+
         def provider(q):
             q = (q or "").lower().strip()
             results = []
@@ -1883,8 +2104,10 @@ class Viewer(Gtk.ApplicationWindow):
             except OSError:
                 files = []
             for f in files:
-                if f.resolve() == target_abs: continue
-                if any(part in (".git", "node_modules") for part in f.parts): continue
+                if f.resolve() == target_abs:
+                    continue
+                if any(part in (".git", "node_modules") for part in f.parts):
+                    continue
                 try:
                     text = f.read_text(encoding="utf-8", errors="replace")
                 except OSError:
@@ -1896,24 +2119,28 @@ class Viewer(Gtk.ApplicationWindow):
                         try:
                             resolved = (f.parent / ref).resolve()
                             if resolved == target_abs:
-                                matched = True; break
+                                matched = True
+                                break
                         except (OSError, ValueError):
                             pass
                     if not matched:
                         for m in WIKI_LINK_RE.finditer(line):
                             nm = m.group(1).strip()
                             if nm == target_stem or nm == target_name:
-                                matched = True; break
-                    if not matched: continue
+                                matched = True
+                                break
+                    if not matched:
+                        continue
                     snip = line.strip()
-                    if len(snip) > 140: snip = snip[:140] + "…"
+                    if len(snip) > 140:
+                        snip = snip[:140] + "…"
                     try:
                         rel = f.relative_to(base)
                     except ValueError:
                         rel = f
                     if q and q not in snip.lower() and q not in str(rel).lower():
                         continue
-                    results.append({"label": snip, "sub": f"{rel}:{i+1}",
+                    results.append({"label": snip, "sub": f"{rel}:{i + 1}",
                                     "key": f"file_line:{f}:{i}"})
             return results or [{"label": "No backlinks found",
                                 "sub": str(target_name), "key": None}]
@@ -1922,28 +2149,37 @@ class Viewer(Gtk.ApplicationWindow):
 
     def _link_integrity_palette(self, *_):
         base = self.current_path.parent if self.current_path else Path.cwd()
-        source = self._buffer_text() if self.mode == "edit" \
-            else (self.current_path.read_text(encoding="utf-8") if self.current_path else "")
+        source = self._buffer_text() if self.mode == "edit" else (
+            self.current_path.read_text(encoding="utf-8") if self.current_path else "")
         issues = []
         for i, line in enumerate(source.split("\n")):
             for m in MD_LINK_RE.finditer(line):
                 url = m.group(3).strip()
-                if url.startswith(("#", "mailto:", "tel:", "http://", "https://", "data:")):
+                if url.startswith(
+                        ("#", "mailto:", "tel:", "http://", "https://", "data:")):
                     continue
-                target = (base / url.split("#", 1)[0]).resolve() if base else Path(url)
+                target = (
+                    base /
+                    url.split(
+                        "#",
+                        1)[0]).resolve() if base else Path(url)
                 if not target.exists():
                     issues.append({"label": f"Missing: {url}",
-                                   "sub": f"line {i+1} · {line.strip()[:120]}",
+                                   "sub": f"line {i + 1} · {line.strip()[:120]}",
                                    "key": f"heading_line:{i}"})
         if not issues:
             issues = [{"label": "All relative links resolve",
                        "sub": f"scanned {len(source.splitlines())} lines",
                        "key": None}]
+
         def provider(q):
             ql = (q or "").lower().strip()
-            if not ql: return issues
-            return [it for it in issues
-                    if ql in it["label"].lower() or ql in (it.get("sub") or "").lower()]
+            if not ql:
+                return issues
+            return [
+                it for it in issues if ql in it["label"].lower() or ql in (
+                    it.get("sub") or "").lower()]
+
         def on_select(k):
             if k and k.startswith("heading_line:"):
                 self._goto_line(int(k[len("heading_line:"):]))
@@ -1956,7 +2192,8 @@ class Viewer(Gtk.ApplicationWindow):
             return
         snaps = list_snapshots(self.current_path)
         if not snaps:
-            self._render_error("No snapshots yet. Snapshots are written on save.")
+            self._render_error(
+                "No snapshots yet. Snapshots are written on save.")
             return
         items = []
         for p in snaps:
@@ -1965,22 +2202,24 @@ class Viewer(Gtk.ApplicationWindow):
                 label = ts.strftime("%Y-%m-%d %H:%M:%S")
             except ValueError:
                 label = p.stem
-            items.append({"label": label, "sub": str(p), "key": f"snapshot:{p}"})
+            items.append(
+                {"label": label, "sub": str(p), "key": f"snapshot:{p}"})
         CommandPalette(self, provider=lambda q: [
             it for it in items
             if not q or q.lower() in it["label"].lower()
         ], on_select=self._palette_select,
-                        placeholder=f"Snapshots of {self.current_path.name}").show_all()
+            placeholder=f"Snapshots of {self.current_path.name}").show_all()
 
     def _show_snapshot_preview(self, snap: Path):
         try:
             text = snap.read_text(encoding="utf-8")
         except OSError as exc:
-            self._render_error(f"Could not read {snap}: {exc}"); return
+            self._render_error(f"Could not read {snap}: {exc}")
+            return
         self.header.props.title = f"snapshot · {snap.stem}"
         self.header.props.subtitle = str(snap)
         self.webview.load_html(render(text, self.theme,
-                                       f"{snap.stem} (snapshot)", snap.parent),
+                                      f"{snap.stem} (snapshot)", snap.parent),
                                snap.parent.as_uri() + "/")
 
     def _pandoc_export(self, fmt: str):
@@ -1988,16 +2227,29 @@ class Viewer(Gtk.ApplicationWindow):
             self._render_error("Open or save a document first.")
             return
         if not shutil.which("pandoc"):
-            self._render_error("pandoc is not installed.\n\nOn Ubuntu:\n\n    sudo apt install pandoc")
+            self._render_error(
+                "pandoc is not installed.\n\nOn Ubuntu:\n\n    sudo apt install pandoc")
             return
         if self.is_untitled or not self.current_path:
-            if not self._save_as(): return
+            if not self._save_as():
+                return
         if self.editor_buffer.get_modified():
             self._save()
-        ext = {"pdf": "pdf", "docx": "docx", "html": "html", "epub": "epub"}[fmt]
-        dialog = Gtk.FileChooserDialog(title=f"Export as {fmt.upper()}",
-                                        parent=self, action=Gtk.FileChooserAction.SAVE)
-        dialog.add_buttons("Cancel", Gtk.ResponseType.CANCEL, "Export", Gtk.ResponseType.OK)
+        ext = {
+            "pdf": "pdf",
+            "docx": "docx",
+            "html": "html",
+            "epub": "epub"}[fmt]
+        dialog = Gtk.FileChooserDialog(
+            title=f"Export as {
+                fmt.upper()}",
+            parent=self,
+            action=Gtk.FileChooserAction.SAVE)
+        dialog.add_buttons(
+            "Cancel",
+            Gtk.ResponseType.CANCEL,
+            "Export",
+            Gtk.ResponseType.OK)
         dialog.set_do_overwrite_confirmation(True)
         assert self.current_path is not None
         dialog.set_current_folder(str(self.current_path.parent))
@@ -2005,13 +2257,15 @@ class Viewer(Gtk.ApplicationWindow):
         r = dialog.run()
         chosen = dialog.get_filename() if r == Gtk.ResponseType.OK else None
         dialog.destroy()
-        if not chosen: return
+        if not chosen:
+            return
         try:
             cmd = ["pandoc", str(self.current_path), "-o", chosen,
                    "--metadata", f"title={self.current_path.stem}"]
             if fmt == "pdf":
                 cmd += ["--pdf-engine=xelatex"]
-            res = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+            res = subprocess.run(
+                cmd, capture_output=True, text=True, timeout=120)
             if res.returncode != 0:
                 self._render_error(
                     f"pandoc failed:\n\n{res.stderr or res.stdout}\n\n"
@@ -2025,15 +2279,18 @@ class Viewer(Gtk.ApplicationWindow):
     # ---- file: new / save / save as -----------------------------------------
 
     def _on_new(self, *_):
-        if not self._confirm_discard_if_dirty(): return
-        self.current_path = None; self.is_untitled = True
+        if not self._confirm_discard_if_dirty():
+            return
+        self.current_path = None
+        self.is_untitled = True
         self.edit_btn.set_sensitive(True)
         self._load_editor_text("# Untitled\n\n")
         self._headings_cache = extract_headings("# Untitled\n\n")
         if self.outline_visible:
             self.outline.update(self._headings_cache)
         if self.monitor is not None:
-            self.monitor.cancel(); self.monitor = None
+            self.monitor.cancel()
+            self.monitor = None
         self.edit_btn.set_active(True)
         if self.mode == "edit" and self.edit_view in ("split", "preview"):
             self._render_live_preview()
@@ -2047,8 +2304,12 @@ class Viewer(Gtk.ApplicationWindow):
 
     def _save_as(self, *_):
         d = Gtk.FileChooserDialog(title="Save markdown file", parent=self,
-                                   action=Gtk.FileChooserAction.SAVE)
-        d.add_buttons("Cancel", Gtk.ResponseType.CANCEL, "Save", Gtk.ResponseType.OK)
+                                  action=Gtk.FileChooserAction.SAVE)
+        d.add_buttons(
+            "Cancel",
+            Gtk.ResponseType.CANCEL,
+            "Save",
+            Gtk.ResponseType.OK)
         d.set_do_overwrite_confirmation(True)
         if self.current_path:
             d.set_current_folder(str(self.current_path.parent))
@@ -2058,11 +2319,15 @@ class Viewer(Gtk.ApplicationWindow):
         r = d.run()
         chosen = d.get_filename() if r == Gtk.ResponseType.OK else None
         d.destroy()
-        if not chosen: return False
+        if not chosen:
+            return False
         p = Path(chosen)
-        if not self._write_to(p): return False
-        self.current_path = p; self.is_untitled = False
-        self._watch_file(p); self._update_title()
+        if not self._write_to(p):
+            return False
+        self.current_path = p
+        self.is_untitled = False
+        self._watch_file(p)
+        self._update_title()
         return True
 
     def _write_to(self, path: Path) -> bool:
@@ -2079,7 +2344,8 @@ class Viewer(Gtk.ApplicationWindow):
         return True
 
     def _confirm_discard_if_dirty(self):
-        if not self.editor_buffer.get_modified(): return True
+        if not self.editor_buffer.get_modified():
+            return True
         d = Gtk.MessageDialog(parent=self, flags=0,
                               message_type=Gtk.MessageType.QUESTION,
                               buttons=Gtk.ButtonsType.NONE,
@@ -2088,9 +2354,12 @@ class Viewer(Gtk.ApplicationWindow):
         d.add_buttons("Discard", Gtk.ResponseType.CLOSE,
                       "Cancel", Gtk.ResponseType.CANCEL,
                       "Save", Gtk.ResponseType.ACCEPT)
-        r = d.run(); d.destroy()
-        if r == Gtk.ResponseType.CANCEL: return False
-        if r == Gtk.ResponseType.ACCEPT: return self._save()
+        r = d.run()
+        d.destroy()
+        if r == Gtk.ResponseType.CANCEL:
+            return False
+        if r == Gtk.ResponseType.ACCEPT:
+            return self._save()
         return True
 
     # ---- undo / redo / clipboard / format ----------------------------------
@@ -2119,7 +2388,8 @@ class Viewer(Gtk.ApplicationWindow):
         if buf.get_has_selection():
             s, e = buf.get_selection_bounds()
             sel = buf.get_text(s, e, True)
-            buf.delete(s, e); buf.insert(s, f"{left}{sel}{right}")
+            buf.delete(s, e)
+            buf.insert(s, f"{left}{sel}{right}")
         else:
             buf.insert_at_cursor(f"{left}{placeholder}{right}")
             end_i = buf.get_iter_at_mark(buf.get_insert())
@@ -2136,13 +2406,16 @@ class Viewer(Gtk.ApplicationWindow):
         if buf.get_has_selection():
             s, e = buf.get_selection_bounds()
             s.set_line_offset(0)
-            if not e.ends_line(): e.forward_to_line_end()
+            if not e.ends_line():
+                e.forward_to_line_end()
             self._prefix_range(buf, s, e, prefix, toggle)
         else:
             it = buf.get_iter_at_mark(buf.get_insert())
-            ls = it.copy(); ls.set_line_offset(0)
+            ls = it.copy()
+            ls.set_line_offset(0)
             le = it.copy()
-            if not le.ends_line(): le.forward_to_line_end()
+            if not le.ends_line():
+                le.forward_to_line_end()
             self._prefix_range(buf, ls, le, prefix, toggle)
         buf.end_user_action()
         self.editor.grab_focus()
@@ -2150,12 +2423,15 @@ class Viewer(Gtk.ApplicationWindow):
     def _prefix_range(self, buf, s, e, prefix, toggle):
         for li in range(s.get_line(), e.get_line() + 1):
             it = buf.get_iter_at_line(li)
-            if not it: continue
+            if not it:
+                continue
             le = it.copy()
-            if not le.ends_line(): le.forward_to_line_end()
+            if not le.ends_line():
+                le.forward_to_line_end()
             cur = buf.get_text(it, le, True)
             if toggle and cur.startswith(prefix):
-                ep = it.copy(); ep.forward_chars(len(prefix))
+                ep = it.copy()
+                ep.forward_chars(len(prefix))
                 buf.delete(it, ep)
             else:
                 buf.insert(it, prefix)
@@ -2192,7 +2468,8 @@ class Viewer(Gtk.ApplicationWindow):
         if buf.get_has_selection():
             s, e = buf.get_selection_bounds()
             lbl = buf.get_text(s, e, True)
-            buf.delete(s, e); buf.insert(s, f"[{lbl}](https://)")
+            buf.delete(s, e)
+            buf.insert(s, f"[{lbl}](https://)")
         else:
             buf.insert_at_cursor("[text](https://)")
         buf.end_user_action()
@@ -2222,7 +2499,8 @@ class Viewer(Gtk.ApplicationWindow):
         icon = APP_DIR / "icon.png"
         if icon.exists():
             try:
-                pb = GdkPixbuf.Pixbuf.new_from_file_at_scale(str(icon), 128, 128, True)
+                pb = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+                    str(icon), 128, 128, True)
                 d.set_logo(pb)
             except Exception:
                 pass
@@ -2240,7 +2518,8 @@ class Viewer(Gtk.ApplicationWindow):
         web.load_html(render(text, self.theme, "What’s new", APP_DIR),
                       APP_DIR.as_uri() + "/")
         scroller = Gtk.ScrolledWindow()
-        scroller.set_hexpand(True); scroller.set_vexpand(True)
+        scroller.set_hexpand(True)
+        scroller.set_vexpand(True)
         scroller.add(web)
         d.get_content_area().pack_start(scroller, True, True, 0)
         d.show_all()
@@ -2274,8 +2553,11 @@ class Viewer(Gtk.ApplicationWindow):
             if found_unreadable:
                 return f"# {APP_NAME} {__version__}\n\n(CHANGELOG.md unreadable.)"
             return f"# {APP_NAME} {__version__}\n\n(No CHANGELOG.md found.)"
-        # find the FIRST `## [<not-Unreleased>]` heading and capture until the next `## [`
-        pat = re.compile(r"^## \[(?!Unreleased)([^\]]+)\][^\n]*$", re.MULTILINE)
+        # find the FIRST `## [<not-Unreleased>]` heading and capture until the
+        # next `## [`
+        pat = re.compile(
+            r"^## \[(?!Unreleased)([^\]]+)\][^\n]*$",
+            re.MULTILINE)
         m = pat.search(text)
         if not m:
             return f"# {APP_NAME} {__version__}\n\nNo released entries found yet."
@@ -2292,7 +2574,11 @@ class Viewer(Gtk.ApplicationWindow):
         def group(title, items):
             g = Gtk.ShortcutsGroup(visible=True, title=title)
             for accel, label in items:
-                g.add(Gtk.ShortcutsShortcut(visible=True, accelerator=accel, title=label))
+                g.add(
+                    Gtk.ShortcutsShortcut(
+                        visible=True,
+                        accelerator=accel,
+                        title=label))
             return g
 
         section.add(group("File", [
@@ -2349,7 +2635,8 @@ class Viewer(Gtk.ApplicationWindow):
                 LAST_SHOWN_VERSION_PATH.write_text(__version__)
             except OSError:
                 pass
-            # don't pop the dialog on the very first run, only on actual upgrades
+            # don't pop the dialog on the very first run, only on actual
+            # upgrades
             if last:
                 self._show_whats_new()
         return False
@@ -2358,20 +2645,28 @@ class Viewer(Gtk.ApplicationWindow):
 
     def _insert_image(self):
         d = Gtk.FileChooserDialog(title="Insert image", parent=self,
-                                   action=Gtk.FileChooserAction.OPEN)
-        d.add_buttons("Cancel", Gtk.ResponseType.CANCEL, "Insert", Gtk.ResponseType.OK)
-        imgf = Gtk.FileFilter(); imgf.set_name("Images")
+                                  action=Gtk.FileChooserAction.OPEN)
+        d.add_buttons(
+            "Cancel",
+            Gtk.ResponseType.CANCEL,
+            "Insert",
+            Gtk.ResponseType.OK)
+        imgf = Gtk.FileFilter()
+        imgf.set_name("Images")
         for p in ("*.png", "*.jpg", "*.jpeg", "*.gif", "*.svg", "*.webp"):
             imgf.add_pattern(p)
         d.add_filter(imgf)
         r = d.run()
         chosen = d.get_filename() if r == Gtk.ResponseType.OK else None
         d.destroy()
-        if not chosen: return
+        if not chosen:
+            return
         ip = Path(chosen)
         if self.current_path:
             try:
-                rel = os.path.relpath(ip, self.current_path.parent).replace(os.sep, "/")
+                rel = os.path.relpath(
+                    ip, self.current_path.parent).replace(
+                    os.sep, "/")
             except ValueError:
                 rel = str(ip)
         else:
@@ -2395,7 +2690,8 @@ class App(Gtk.Application):
 
 
 def parse_args(argv):
-    parser = argparse.ArgumentParser(prog=APP_NAME,
+    parser = argparse.ArgumentParser(
+        prog=APP_NAME,
         description="Minimal modern markdown viewer + editor.")
     parser.add_argument("file", nargs="?", help="Path to a markdown file.")
     parser.add_argument("-V", "--version", action="version",

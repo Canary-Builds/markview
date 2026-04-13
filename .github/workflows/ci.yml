@@ -32,7 +32,7 @@ jobs:
         run: python3 -m py_compile markview.py
 
       - name: Ruff
-        run: ruff check --no-cache --select F,W,B,UP markview.py
+        run: ruff check --no-cache --select F,W,B,UP,E701,E702 markview.py
 
       - name: Pyflakes
         run: pyflakes markview.py

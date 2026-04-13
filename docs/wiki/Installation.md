@@ -1,27 +1,56 @@
 # Installation
 
-markview is a single Python script plus a CSS file, an icon, and a `.desktop` entry. There's no build step and no Python virtualenv — the dependencies are system packages (GTK, WebKit, GtkSourceView) plus two pip-installable libraries that are usually already present.
+markview can be installed from Ubuntu PPA (`apt`), Snapcraft, Flathub (Flatpak), or from source.
 
-## Required
+## Quick install (recommended)
+
+### Ubuntu App Center / APT (PPA)
+
+```bash
+sudo add-apt-repository ppa:mareekkk/canarybuilds
+sudo apt update
+sudo apt install markview
+```
+
+### Snapcraft
+
+```bash
+sudo snap install markview
+```
+
+### Flatpak (Flathub)
+
+```bash
+flatpak install flathub com.canarybuilds.Markview
+flatpak run com.canarybuilds.Markview
+```
+
+If Flathub says the app is not found yet, it means the submission is still under review/publishing.
+
+## Source install (manual)
+
+Use this if you want local development or if your distro package is not available yet.
+
+## Required packages
 
 | Package | Purpose |
 |---|---|
-| `python3` ≥ 3.10 | Runtime |
+| `python3` >= 3.10 | Runtime |
 | `python3-gi` | PyGObject bindings |
-| `gir1.2-gtk-3.0` | GTK 3 typelib |
-| `gir1.2-webkit2-4.1` | WebKit2 4.1 typelib |
-| `gir1.2-gtksource-4` | GtkSourceView 4 typelib |
+| `GTK 3` typelib | UI toolkit |
+| `WebKit2 4.1` typelib | Preview rendering |
+| `GtkSourceView` typelib | Editor widget |
 | `python3-markdown` | Markdown renderer |
 | `python3-pygments` | Code syntax highlighting |
 
-## Optional
+## Optional packages
 
 | Package | Adds |
 |---|---|
 | `pandoc` | PDF / DOCX / HTML / EPUB export |
-| `python3-html2text` | Higher-quality HTML-clipboard → markdown on paste |
+| `python3-html2text` | Better HTML clipboard -> markdown conversion |
 
-## Ubuntu 22.04+ / Debian 12+
+### Ubuntu 22.04+ / Debian 12+
 
 ```bash
 sudo apt install python3-gi gir1.2-gtk-3.0 gir1.2-webkit2-4.1 \
@@ -30,7 +59,7 @@ sudo apt install python3-gi gir1.2-gtk-3.0 gir1.2-webkit2-4.1 \
 sudo apt install pandoc python3-html2text
 ```
 
-## Arch / Manjaro
+### Arch / Manjaro
 
 ```bash
 sudo pacman -S python-gobject gtk3 webkit2gtk-4.1 gtksourceview4 \
@@ -39,43 +68,49 @@ sudo pacman -S python-gobject gtk3 webkit2gtk-4.1 gtksourceview4 \
 sudo pacman -S pandoc python-html2text
 ```
 
-## Fedora 39+
+### Fedora
 
 ```bash
 sudo dnf install python3-gobject gtk3 webkit2gtk4.1 gtksourceview4 \
                  python3-markdown python3-pygments
+# optional
 sudo dnf install pandoc python3-html2text
 ```
 
-## Verify the dependencies
+## Verify dependencies
 
 ```bash
-python3 -c "import gi; gi.require_version('Gtk','3.0'); gi.require_version('WebKit2','4.1'); gi.require_version('GtkSource','4'); print('ok')"
-python3 -c "import markdown, pygments; print('md+pygments ok')"
+python3 - <<'PY'
+import gi
+gi.require_version('Gtk', '3.0')
+gi.require_version('WebKit2', '4.1')
+try:
+    gi.require_version('GtkSource', '5')
+except ValueError:
+    gi.require_version('GtkSource', '4')
+
+import markdown, pygments
+print('GTK/WebKit/GtkSource + markdown + pygments: ok')
+PY
 ```
 
-## Get the code
+## Install from source
 
 ```bash
 git clone https://github.com/Canary-Builds/markview.git ~/markview
 cd ~/markview
-```
-
-## Install the CLI + `.desktop` entry
-
-```bash
 ./install.sh
 ```
 
 This creates:
 
-| Path | What it is |
+| Path | Purpose |
 |---|---|
-| `~/.local/bin/markview` | CLI wrapper (a 2-line shell script) |
-| `~/.local/share/applications/markview.desktop` | Desktop entry (appears in your launcher) |
-| `~/.local/share/icons/hicolor/scalable/apps/markview.svg` | App icon |
+| `~/.local/bin/markview` | CLI wrapper |
+| `~/.local/share/applications/markview.desktop` | Desktop launcher entry |
+| `~/.local/share/icons/hicolor/<size>/apps/markview.png` | App icons |
 
-Make sure `~/.local/bin` is on your `PATH`:
+Ensure `~/.local/bin` is in your `PATH`:
 
 ```bash
 echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
@@ -84,15 +119,14 @@ echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
 ## Run
 
 ```bash
-markview                 # welcome screen
-markview README.md       # open a specific file
-markview -V              # print version
+markview
+markview README.md
+markview -V
 ```
 
-## Uninstall
+## Uninstall source install
 
 ```bash
 ~/markview/uninstall.sh
 ```
 
-This removes the CLI, desktop entry, and icon. The source folder in `~/markview/` is not deleted.

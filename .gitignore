@@ -10,6 +10,7 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+installer_output/
 .coverage
 .pytest_cache/
 .ruff_cache/

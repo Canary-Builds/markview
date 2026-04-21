@@ -1,0 +1,60 @@
+name: Release Windows Installer
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows-installer:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install Python dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-win.txt pyinstaller
+
+      - name: Install Inno Setup
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.6
+        with:
+          path: C:\Program Files (x86)\Inno Setup 6
+          install-only: true
+
+      - name: Build Windows bundle
+        shell: pwsh
+        run: python -m PyInstaller --clean -y markview.spec
+
+      - name: Smoke-test packaged Qt bundle
+        shell: pwsh
+        run: python .\scripts\smoke_test_win_bundle.py
+
+      - name: Build Windows installer
+        shell: pwsh
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer_win.iss
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: markview-windows-installer
+          path: installer_output\markview-*-win-setup.exe
+
+      - name: Attach installer to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: installer_output\markview-*-win-setup.exe

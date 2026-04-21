@@ -1,0 +1,5 @@
+PyQt6>=6.6
+PyQt6-WebEngine>=6.6
+markdown
+pygments
+html2text

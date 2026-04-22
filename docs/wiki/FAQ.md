@@ -10,7 +10,7 @@ GTK3 + WebKit2 4.1 is everywhere on stock Linux desktops today. GTK4 + libadwait
 
 ### Is it available on macOS or Windows?
 
-No. GTK3 + WebKit2 on those platforms is either unsupported or painful. Run Linux in a VM or use a different editor on those OSes.
+Windows is supported and shipped from GitHub Releases as an installer. macOS is still not supported.
 
 ### Does it sync my notes?
 

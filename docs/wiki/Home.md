@@ -1,12 +1,12 @@
 # markview Wiki
 
-Welcome. This is the living documentation for **markview** — a minimal, modern markdown viewer and editor for Linux.
+Welcome. This is the living documentation for **markview** — a minimal, modern markdown viewer and editor for Linux and Windows.
 
 > The wiki pages here are mirrored into the GitHub Wiki. Edit either, but open a PR for substantive doc changes so the canonical copy in `docs/wiki/` stays in sync.
 
 ## Start here
 
-- [Installation](Installation.md) — Ubuntu, Debian, Fedora, Arch
+- [Installation](Installation.md) — Windows installer, Ubuntu, Debian, Fedora, Arch
 - [Keyboard Shortcuts](Keyboard-Shortcuts.md) — the full reference
 - [Configuration](Configuration.md) — `custom.css`, assets folder, snapshots
 

@@ -6,6 +6,20 @@ versioning follows [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.5.4] — 2026-04-22
+
+### Added
+- **Windows support is now a first-class release target.** The repo now includes a Windows frontend (`markview_win.py`), PyInstaller spec, Inno Setup installer script, Windows version metadata, and a smoke test for the packaged Qt runtime.
+- **Automated Windows release workflow.** Tag pushes matching `v*` now build the Windows installer on GitHub Actions and attach it to the GitHub Release.
+
+### Fixed
+- **Windows Qt packaging no longer strips required runtime DLLs.** The PyInstaller build now keeps the Qt QML/WebEngine dependencies required by `QtWebChannel` and `QtWebEngine`.
+- **Windows menu construction is PyQt6-compatible.** Menu actions now use explicit `QAction` wiring instead of fragile overloaded `addAction(...)` calls.
+
+### Changed
+- Repository documentation now reflects the supported platforms as **Linux and Windows**.
+- Repository versioning is now aligned to `0.5.4` for the release tag, README badge, changelog, and both application entry points.
+
 ## [0.5.3] — 2026-04-13
 
 ### Fixed

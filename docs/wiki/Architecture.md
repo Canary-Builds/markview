@@ -1,6 +1,10 @@
 # Architecture
 
-markview is intentionally flat: a single Python file (`markview.py`) plus a stylesheet and an icon. ~1500 lines of code.
+markview now has a shared rendering core plus two native frontends:
+
+- `markview.py` for Linux (`GTK3 + WebKit2 + GtkSourceView`)
+- `markview_win.py` for Windows (`PyQt6 + QtWebEngine + QWebChannel`)
+- `markview_core.py` for shared markdown/rendering helpers
 
 ```
 ┌──────────────────────────────────────────────────────────┐
@@ -42,7 +46,9 @@ source (string)
     ├─ inject JS bridge           ── scrollToAnchor, task click postMessage,
     │                                 mermaid.run, renderMathInElement
     │
-    └─▶ WebKit2.WebView.load_html(html, base_uri)
+    └─▶ native webview loads HTML
+         Linux: WebKit2.WebView.load_html(html, base_uri)
+         Windows: QWebEngineView.setHtml(html, base_url)
 ```
 
 ## Editor
@@ -62,9 +68,9 @@ GtkSource.View
     │                                       block move (Alt+↑/↓)
 ```
 
-## WebKit bridge
+## Bridge layer
 
-WebKit is created with a `UserContentManager`:
+Linux uses a WebKit `UserContentManager`:
 
 ```python
 ucm.register_script_message_handler("markview")
@@ -84,7 +90,9 @@ Payload types today:
 |---|---|
 | `task_toggle` | Flip `[ ]` / `[x]` at `line` (buffer or file) |
 
-Python calls back into JS via `webview.run_javascript(...)` — currently for `window.markview.scrollToAnchor(slug)` only.
+Windows uses `QWebChannel`, exposing a `bridge` object to the page and receiving JSON payloads through `postMessage(...)`.
+
+Both frontends support the same checkbox-toggle payload model.
 
 ## View modes
 
@@ -123,16 +131,23 @@ Timer-based debouncing for expensive operations to avoid flicker or compute spik
 ## Dependencies map
 
 ```
-markview.py
+markview_core.py
 │
-├─ gi + Gtk/WebKit2/GtkSource/Gdk/GLib/Gio/Pango  ── native toolkit
-├─ markdown + pygments                           ── server-side render
+├─ markdown + pygments                           ── shared render pipeline
 ├─ markdown.extensions.toc.slugify               ── heading anchors
 ├─ html2text (optional)                          ── smart-paste HTML
 ├─ html.parser (stdlib)                          ── fallback for above
 ├─ urllib.request (stdlib)                       ── open-from-URL
 ├─ subprocess (stdlib)                           ── pandoc export
 └─ hashlib (stdlib)                              ── snapshot folder naming
+
+markview.py
+│
+└─ gi + Gtk/WebKit2/GtkSource/Gdk/GLib/Gio/Pango ── Linux frontend
+
+markview_win.py
+│
+└─ PyQt6 + QtWebEngine + QWebChannel             ── Windows frontend
 ```
 
 ## Adding a new palette action

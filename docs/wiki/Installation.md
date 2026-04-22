@@ -1,8 +1,16 @@
 # Installation
 
-markview can be installed from Ubuntu PPA (`apt`), Snapcraft, Flathub (Flatpak), or from source.
+markview can be installed on Windows from GitHub Releases, on Linux from Ubuntu PPA (`apt`), Snapcraft, Flathub (Flatpak), or from source.
 
 ## Quick install (recommended)
+
+### Windows installer
+
+Download the latest `markview-<version>-win-setup.exe` from the GitHub Releases page:
+
+- https://github.com/Canary-Builds/markview/releases
+
+The Windows installer is built from the repo's release workflow and installs the packaged PyQt6 application.
 
 ### Ubuntu App Center / APT (PPA)
 
@@ -29,7 +37,7 @@ If Flathub says the app is not found yet, it means the submission is still under
 
 Arch/Manjaro AUR and Fedora packaging are planned but not yet published. Track this in [ROADMAP.md](../../ROADMAP.md).
 
-## Source install (manual)
+## Linux source install (manual)
 
 Use this if you want local development or if your distro package is not available yet.
 
@@ -107,6 +115,26 @@ markview
 markview README.md
 markview -V
 ```
+
+Windows source run:
+
+```powershell
+py .\markview_win.py
+```
+
+## Windows build from source
+
+```powershell
+py -3.13 -m pip install -r requirements-win.txt pyinstaller
+powershell -ExecutionPolicy Bypass -File .\build_win.ps1
+```
+
+Outputs:
+
+| Path | Purpose |
+|---|---|
+| `dist\markview\markview.exe` | packaged Windows app |
+| `installer_output\markview-<version>-win-setup.exe` | Windows installer |
 
 ## Uninstall source install
 

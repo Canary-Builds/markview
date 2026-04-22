@@ -1,11 +1,12 @@
 # markview
 
-> Minimal, modern markdown viewer **and editor** for Linux — GTK3 + WebKit + GtkSourceView.
+> Minimal, modern markdown viewer **and editor** for Linux and Windows.
+> GTK3 + WebKit on Linux. PyQt6 + QtWebEngine on Windows.
 > No Electron, no tray daemon, no account. Starts in under a second.
 
-[![version](https://img.shields.io/badge/version-0.5.3-blue)](CHANGELOG.md)
+[![version](https://img.shields.io/badge/version-0.5.4-blue)](CHANGELOG.md)
 [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![platform](https://img.shields.io/badge/platform-Linux-lightgrey)](#install)
+[![platform](https://img.shields.io/badge/platform-Linux%20%7C%20Windows-lightgrey)](#install)
 [![snap](https://img.shields.io/badge/Snapcraft-markview-E95420?logo=snapcraft&logoColor=white)](https://snapcraft.io/markview)
 [![ubuntu-ppa](https://img.shields.io/badge/Ubuntu%20PPA-mareekkk%2Fcanarybuilds-E95420?logo=ubuntu&logoColor=white)](https://launchpad.net/~mareekkk/+archive/ubuntu/canarybuilds)
 [![flathub](https://img.shields.io/badge/Flathub-com.canarybuilds.Markview-000000?logo=flathub&logoColor=white)](https://flathub.org/apps/com.canarybuilds.Markview)
@@ -39,7 +40,7 @@ The chrome stays minimal: **three buttons in the header**, one toolbar that only
 ## Features
 
 ### Viewing
-- GitHub-flavoured light/dark theme, auto-detected from your GTK settings
+- GitHub-flavoured light/dark theme, auto-detected from your system theme
 - Pygments syntax highlighting in code blocks
 - Live reload when the file changes on disk
 - Drag-and-drop any `.md` onto the window
@@ -82,6 +83,12 @@ Open / New / Save · Toggle edit / split / preview · Outline · Typewriter · R
   <a href="https://flathub.org/apps/com.canarybuilds.Markview"><img alt="Get it on Flathub" src="https://img.shields.io/badge/Flathub-com.canarybuilds.Markview-000000?logo=flathub&logoColor=white"></a>
 </p>
 
+### Windows
+
+Download the latest Windows installer from [GitHub Releases](https://github.com/Canary-Builds/markview/releases).
+
+The Windows build ships as an `.exe` installer built with Inno Setup and includes the packaged PyQt6 runtime.
+
 ### Ubuntu (App Center via PPA)
 
 ```bash
@@ -103,7 +110,7 @@ flatpak install flathub com.canarybuilds.Markview
 flatpak run com.canarybuilds.Markview
 ```
 
-### Source install (Ubuntu 22.04+ / Debian 12+)
+### Linux source install (Ubuntu 22.04+ / Debian 12+)
 
 ```bash
 sudo apt install python3-gi gir1.2-gtk-3.0 gir1.2-webkit2-4.1 \
@@ -135,7 +142,23 @@ sudo dnf install python3-gobject gtk3 webkit2gtk4.1 gtksourceview4 \
 | `python3-html2text` | Higher-quality HTML-clipboard → markdown conversion |
 | internet | KaTeX + Mermaid (loaded from a CDN on each render) |
 
+### Windows build from source
+
+```powershell
+py -3.13 -m pip install -r requirements-win.txt pyinstaller
+powershell -ExecutionPolicy Bypass -File .\build_win.ps1
+```
+
+This produces:
+
+| Path | Purpose |
+|---|---|
+| `dist\markview\markview.exe` | packaged Windows app |
+| `installer_output\markview-<version>-win-setup.exe` | Windows installer |
+
 ## Run
+
+Linux:
 
 ```bash
 markview                 # welcome screen
@@ -143,7 +166,12 @@ markview notes.md        # open a file
 markview -V              # version
 ```
 
-Or right-click any `.md` → **Open With → markview**.
+Windows:
+
+```powershell
+.\dist\markview\markview.exe
+py .\markview_win.py README.md
+```
 
 ## Shortcuts
 
@@ -183,13 +211,19 @@ See [Configuration](docs/wiki/Configuration.md) for details.
 
 ```
 markview/
-├── markview.py         # single-file app (~1500 lines)
+├── markview.py         # Linux GTK3/WebKit frontend
+├── markview_win.py     # Windows PyQt6/QtWebEngine frontend
+├── markview_core.py    # shared markdown/rendering helpers
 ├── style.css           # preview theme (light/dark/print)
 ├── icon-final.png      # master icon (1536×1024 source)
 ├── icon.png            # 512×512 square (installed via install.sh)
 ├── icon-{16..256}.png  # hicolor sizes
 ├── markview.desktop    # desktop entry template
 ├── install.sh          # user-local installer
+├── build_win.ps1       # Windows bundle + installer helper
+├── installer_win.iss   # Inno Setup script
+├── requirements-win.txt
+├── markview.spec       # PyInstaller spec for Windows
 ├── uninstall.sh
 ├── CHANGELOG.md
 ├── ROADMAP.md
@@ -201,7 +235,7 @@ markview/
 
 ## Architecture (TL;DR)
 
-Render pipeline: `markdown` + custom preprocessors (tasks, transclusion) → HTML → WebKit. Editor is GtkSourceView with markdown syntax highlighting. A JS bridge handles checkbox clicks and `scrollToAnchor(slug)` messages. See [Architecture](docs/wiki/Architecture.md).
+Render pipeline: `markdown` + shared preprocessors (tasks, transclusion) → HTML → native webview frontend. Linux uses GTK3 + WebKit2. Windows uses PyQt6 + QtWebEngine/QWebChannel. See [Architecture](docs/wiki/Architecture.md).
 
 ## Roadmap
 

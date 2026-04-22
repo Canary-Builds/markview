@@ -44,7 +44,7 @@ from markview_core import (  # noqa: E402
     write_snapshot as _write_snapshot,
 )
 
-__version__ = "0.5.3"
+__version__ = "0.5.4"
 
 APP_ID = "dev.markview.Viewer"
 APP_NAME = "markview"

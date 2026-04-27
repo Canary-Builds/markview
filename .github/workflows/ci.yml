@@ -46,7 +46,7 @@ jobs:
           import ast
           from pathlib import Path
 
-          src = Path("vertexmarkdown.py").read_text(encoding="utf-8")
+          src = Path("vertexmarkdown.py").read_text(encoding="utf-8-sig")
           tree = ast.parse(src, filename="vertexmarkdown.py")
           defined = set()
 

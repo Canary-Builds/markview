@@ -6,6 +6,13 @@ versioning follows [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.6.1] â€” 2026-04-27
+
+### Fixed
+- **Windows GitHub release builds now install Inno Setup reliably again.** The release workflow now installs Inno Setup directly on the runner instead of depending on the failing third-party setup action.
+- **Release recovery is now manual-dispatchable.** The Windows release workflow accepts an optional tag input so an existing tag can be rebuilt and re-attached without moving tags or cutting ad hoc hotfixes.
+- **CI pytest now runs against the shared core module with the Python markdown dependencies installed.** The release branch no longer shows a false-red CI failure caused by importing the GTK frontend under the isolated Actions Python environment.
+
 ## [0.6.0] â€” 2026-04-27
 
 ### Changed

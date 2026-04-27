@@ -7,7 +7,7 @@
 ;   3. Click Build > Compile
 
 #define MyAppName "VertexMarkdown"
-#define MyAppVersion "0.6.0"
+#define MyAppVersion "0.6.1"
 #define MyAppPublisher "Canary Builds"
 #define MyAppURL "https://github.com/Canary-Builds/VertexMarkdown"
 #define MyAppExeName "vertexmarkdown.exe"

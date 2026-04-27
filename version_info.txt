@@ -18,12 +18,12 @@ VSVersionInfo(
           [
             StringStruct(u'CompanyName', u'Canary Builds'),
             StringStruct(u'FileDescription', u'VertexMarkdown â€” Markdown Viewer & Editor'),
-            StringStruct(u'FileVersion', u'0.6.0.0'),
+            StringStruct(u'FileVersion', u'0.6.1.0'),
             StringStruct(u'InternalName', u'vertexmarkdown'),
             StringStruct(u'LegalCopyright', u'Copyright (c) 2026 Canary Builds'),
             StringStruct(u'OriginalFilename', u'vertexmarkdown.exe'),
             StringStruct(u'ProductName', u'VertexMarkdown'),
-            StringStruct(u'ProductVersion', u'0.6.0.0'),
+            StringStruct(u'ProductVersion', u'0.6.1.0'),
           ]
         )
       ]

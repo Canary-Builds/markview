@@ -67,7 +67,7 @@ from vertexmarkdown_core import (
     write_snapshot as _write_snapshot,
 )
 
-__version__ = "0.6.0"
+__version__ = "0.6.1"
 
 APP_NAME = "VertexMarkdown"
 APP_DIR = Path(__file__).resolve().parent

@@ -4,7 +4,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-import vertexmarkdown as mv  # noqa: E402
+import vertexmarkdown_core as mv  # noqa: E402
 
 
 def test_toggle_task_line_round_trip():

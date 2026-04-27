@@ -44,7 +44,7 @@ from vertexmarkdown_core import (  # noqa: E402
     write_snapshot as _write_snapshot,
 )
 
-__version__ = "0.6.0"
+__version__ = "0.6.1"
 
 APP_ID = "com.canarybuilds.VertexMarkdown"
 APP_NAME = "VertexMarkdown"

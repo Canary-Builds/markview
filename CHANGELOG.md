@@ -6,6 +6,12 @@ versioning follows [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.6.3] — 2026-05-01
+
+### Changed
+- Public documentation, examples, and release references now consistently use the VertexWrite product name and `vertexwrite` command/package identifiers.
+- Changelog and packaging notes now describe legacy compatibility generically while keeping the runtime migration cleanup in place.
+
 ## [0.6.2] — 2026-05-01
 
 ### Changed

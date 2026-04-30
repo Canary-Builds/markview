@@ -11,7 +11,7 @@ VertexWrite has no configuration file by design. A few optional drop-ins let you
 | `<doc>/assets/` | next to the document | Pasted images (relative) |
 | `~/Pictures/vertexwrite/` | — | Pasted images for *untitled* buffers (absolute) |
 
-If the new `vertexwrite` config or state directory does not exist yet, VertexWrite reads legacy `vertexmarkdown` or `markview` directories so existing custom CSS and snapshots remain available after an upgrade.
+If the new `vertexwrite` config or state directory does not exist yet, VertexWrite reads legacy config/state directories so existing custom CSS and snapshots remain available after an upgrade.
 
 ## Custom CSS
 
@@ -78,8 +78,7 @@ xdg-mime default vertexwrite.desktop text/plain
 
 ```
 vertexwrite [FILE]
-VertexWrite -V / --version
+vertexwrite -V / --version
 ```
 
 Only one positional arg is accepted. All runtime behaviour is controlled from the UI.
-

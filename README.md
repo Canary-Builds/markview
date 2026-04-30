@@ -117,8 +117,8 @@ flatpak run com.canarybuilds.VertexWrite
 sudo apt install python3-gi gir1.2-gtk-3.0 gir1.2-webkit2-4.1 \
                  gir1.2-gtksource-4 python3-markdown python3-pygments
 
-git clone https://github.com/Canary-Builds/vertexwrite.git ~/VertexWrite
-cd ~/VertexWrite && ./install.sh
+git clone https://github.com/Canary-Builds/vertexwrite.git ~/vertexwrite
+cd ~/vertexwrite && ./install.sh
 ```
 
 ### Arch

@@ -90,8 +90,8 @@ PY
 ## Install from source
 
 ```bash
-git clone https://github.com/Canary-Builds/vertexwrite.git ~/VertexWrite
-cd ~/VertexWrite
+git clone https://github.com/Canary-Builds/vertexwrite.git ~/vertexwrite
+cd ~/vertexwrite
 ./install.sh
 ```
 
@@ -114,7 +114,7 @@ echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
 ```bash
 vertexwrite
 vertexwrite README.md
-VertexWrite -V
+vertexwrite -V
 ```
 
 Windows source run:

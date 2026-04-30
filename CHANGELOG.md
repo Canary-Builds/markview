@@ -9,12 +9,12 @@ versioning follows [SemVer](https://semver.org/).
 ## [0.6.2] — 2026-05-01
 
 ### Changed
-- **Final product rename to VertexWrite.** Replaces the interim VertexMarkdown naming across Linux, Windows, source, Debian, Snap, Flatpak, desktop, AppStream, and release assets.
+- **Final product rename to VertexWrite.** Linux, Windows, source, Debian, Snap, Flatpak, desktop, AppStream, and release assets now use the VertexWrite name consistently.
 - **Package and command identifiers now use `vertexwrite`.** The Linux CLI, Windows executable, installer outputs, app IDs, config/state paths, docs, and release artifacts now match the VertexWrite brand.
 
 ### Compatibility
-- Existing `vertexmarkdown` and `markview` config/state directories are still read when the new `vertexwrite` directories do not exist.
-- Source install and uninstall cleanup remove stale `vertexmarkdown` and `markview` launchers, desktop entries, and icons.
+- Existing legacy config/state directories are still read when the new `vertexwrite` directories do not exist.
+- Source install and uninstall cleanup remove stale legacy launchers, desktop entries, and icons.
 
 ## [0.6.1] — 2026-04-27
 

@@ -8,8 +8,8 @@ Linux:
 sudo apt install python3-gi gir1.2-gtk-3.0 gir1.2-webkit2-4.1 \
                  gir1.2-gtksource-4 python3-markdown python3-pygments
 
-git clone https://github.com/<you>/VertexWrite.git
-cd VertexWrite
+git clone https://github.com/<you>/vertexwrite.git
+cd vertexwrite
 
 # optional extras for dev
 sudo apt install python3-html2text pandoc

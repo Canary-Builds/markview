@@ -11,7 +11,7 @@
 set -euo pipefail
 
 OWNER="Canary-Builds"
-REPO="VertexWrite"
+REPO="vertexwrite"
 WIKI_URL="https://github.com/${OWNER}/${REPO}.wiki.git"
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"

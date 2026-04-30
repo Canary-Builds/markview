@@ -2,8 +2,7 @@ vertexwrite (0.6.2+noble1) noble; urgency=medium
 
   * Rename application and packaging identity to VertexWrite.
   * Update launchers, desktop metadata, icons, and installed paths to vertexwrite.
-  * Preserve compatibility with existing vertexmarkdown and markview user
-    config and state paths.
+  * Preserve compatibility with existing legacy user config and state paths.
 
  -- Mark <mark@canarybuilds.com>  Fri, 01 May 2026 00:00:00 +0800
 

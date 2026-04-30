@@ -20,6 +20,8 @@ chmod +x "${APP_DIR}/vertexwrite.py"
 # CLI launcher on PATH.
 cat > "${BIN_DIR}/vertexwrite" <<EOF
 #!/usr/bin/env bash
+: "\${WEBKIT_DISABLE_DMABUF_RENDERER:=1}"
+export WEBKIT_DISABLE_DMABUF_RENDERER
 exec python3 "${APP_DIR}/vertexwrite.py" "\$@"
 EOF
 chmod +x "${BIN_DIR}/vertexwrite"

@@ -14,6 +14,10 @@ import urllib.request
 import urllib.error
 from pathlib import Path
 
+# WebKitGTK can abort during startup on some NVIDIA/Wayland GBM stacks unless
+# the DMABUF renderer is disabled before WebKit is loaded.
+os.environ.setdefault("WEBKIT_DISABLE_DMABUF_RENDERER", "1")
+
 import gi
 gi.require_version("Gtk", "3.0")
 gi.require_version("WebKit2", "4.1")

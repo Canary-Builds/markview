@@ -6,6 +6,9 @@ versioning follows [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+- Linux startup now defaults `WEBKIT_DISABLE_DMABUF_RENDERER=1` before WebKitGTK loads, avoiding a GBM/EGL abort seen on some NVIDIA driver stacks.
+
 ## [0.6.4] — 2026-05-01
 
 ### Added

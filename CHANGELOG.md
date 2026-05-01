@@ -6,10 +6,22 @@ versioning follows [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.6.9] — 2026-05-01
+
+### Changed
+- The canonical logo source is now `vertex-logo.png`, with transparent Linux icon assets and the Windows `.ico` regenerated from it.
+- The document sidebar now starts directly with `Recent documents`, removing the redundant `Documents` heading.
+- The header sidebar control now uses explicit show/hide sidebar icons instead of the generic sidebar toggle icon.
+- The folder-tree markdown-file chooser now uses a file icon instead of a folder/open icon.
+
+### Fixed
+- Hiding the document sidebar now removes it from layout completely instead of leaving a visible 180px pane.
+- Sidebar resizing now clamps to a safe minimum while keeping the sidebar child aligned at the left edge, avoiding left-side clipping.
+
 ## [0.6.8] — 2026-05-01
 
 ### Changed
-- The app icon set now uses the new blue VertexWrite logo supplied as `vertexwrite-logo.png`.
+- The app icon set now uses the new blue VertexWrite logo.
 
 ### Fixed
 - The Linux folder tree now uses a custom list layout instead of `Gtk.TreeView`, preventing GTK from clipping the left side of file and folder names while resizing the sidebar.
@@ -31,7 +43,7 @@ versioning follows [SemVer](https://semver.org/).
 - **File-based folder tree selection.** The sidebar can now choose a markdown file and then display the folder containing that file.
 
 ### Changed
-- The final VertexWrite logo is now sourced from `vertexwrite-logo.png`, with Linux hicolor icons and the Windows `.ico` regenerated from that logo.
+- The final VertexWrite logo source is used to regenerate Linux hicolor icons and the Windows `.ico`.
 
 ### Fixed
 - Linux startup now defaults `WEBKIT_DISABLE_DMABUF_RENDERER=1` before WebKitGTK loads, avoiding a GBM/EGL abort seen on some NVIDIA driver stacks.

@@ -48,7 +48,7 @@ VertexWrite/
 ├── vertexwrite_win.py     # Windows Qt frontend
 ├── vertexwrite_core.py    # shared renderer/helpers
 ├── style.css           # preview theme
-├── vertexwrite-logo.png # final logo source
+├── vertex-logo.png # final logo source
 ├── icon-final.png      # copy of the final logo source
 ├── icon.png            # app icon generated from the logo
 ├── icon-{16..256}.png  # hicolor sizes generated from the logo

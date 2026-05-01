@@ -68,7 +68,7 @@ from vertexwrite_core import (
     write_snapshot as _write_snapshot,
 )
 
-__version__ = "0.6.8"
+__version__ = "0.6.9"
 
 APP_NAME = "VertexWrite"
 APP_SLUG = "vertexwrite"

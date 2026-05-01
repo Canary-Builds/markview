@@ -4,7 +4,7 @@
 > GTK3 + WebKit on Linux. PyQt6 + QtWebEngine on Windows.
 > No Electron, no tray daemon, no account. Starts in under a second.
 
-[![version](https://img.shields.io/badge/version-0.6.8-blue)](CHANGELOG.md)
+[![version](https://img.shields.io/badge/version-0.6.9-blue)](CHANGELOG.md)
 [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![platform](https://img.shields.io/badge/platform-Linux%20%7C%20Windows-lightgrey)](#install)
 [![snap](https://img.shields.io/badge/Snapcraft-vertexwrite-E95420?logo=snapcraft&logoColor=white)](https://snapcraft.io/vertexwrite)
@@ -12,7 +12,7 @@
 [![flathub](https://img.shields.io/badge/Flathub-com.canarybuilds.VertexWrite-000000?logo=flathub&logoColor=white)](https://flathub.org/apps/com.canarybuilds.VertexWrite)
 
 <p align="center">
-  <img src="vertexwrite-logo.png" width="128" alt="VertexWrite logo">
+  <img src="vertex-logo.png" width="128" alt="VertexWrite logo">
 </p>
 
 ## Screenshots
@@ -216,7 +216,7 @@ VertexWrite/
 ├── vertexwrite_win.py     # Windows PyQt6/QtWebEngine frontend
 ├── vertexwrite_core.py    # shared markdown/rendering helpers
 ├── style.css           # preview theme (light/dark/print)
-├── vertexwrite-logo.png # final logo source
+├── vertex-logo.png # final logo source
 ├── icon-final.png      # copy of the final logo source
 ├── icon.png            # 512×512 square generated from the logo
 ├── icon-{16..256}.png  # hicolor sizes generated from the logo

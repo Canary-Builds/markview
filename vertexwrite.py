@@ -48,7 +48,7 @@ from vertexwrite_core import (  # noqa: E402
     write_snapshot as _write_snapshot,
 )
 
-__version__ = "0.6.8"
+__version__ = "0.6.9"
 
 APP_ID = "com.canarybuilds.VertexWrite"
 APP_NAME = "VertexWrite"
@@ -94,6 +94,9 @@ RECENT_MAX = 50
 MARKDOWN_ROOT_PATH = STATE_DIR / "markdown-root.txt"
 MARKDOWN_SCAN_MAX = 10000
 MARKDOWN_EXTENSIONS = {".md", ".markdown", ".mdown", ".mkd"}
+SIDEBAR_MIN_WIDTH = 180
+SIDEBAR_INDENT_STEP = 8
+SIDEBAR_INDENT_MAX = 32
 MARKDOWN_SKIP_DIRS = {
     ".git",
     "node_modules",
@@ -246,6 +249,21 @@ def _separator():
     sep.set_margin_start(4)
     sep.set_margin_end(4)
     return sep
+
+
+def _shrink_label(
+        text: str,
+        *,
+        ellipsize=Pango.EllipsizeMode.END,
+        xalign=0) -> Gtk.Label:
+    label = Gtk.Label(label=text, xalign=xalign)
+    label.set_ellipsize(ellipsize)
+    label.set_single_line_mode(True)
+    label.set_hexpand(True)
+    label.set_halign(Gtk.Align.FILL)
+    label.set_size_request(1, -1)
+    label.set_max_width_chars(1)
+    return label
 
 
 def _menu_button(icon_name, tooltip, items):
@@ -416,7 +434,8 @@ class DocumentSidebar(Gtk.Box):
             on_choose_markdown_folder,
             on_rescan_markdown_folder):
         super().__init__(orientation=Gtk.Orientation.VERTICAL, spacing=0)
-        self.set_size_request(160, -1)
+        self.set_size_request(SIDEBAR_MIN_WIDTH, -1)
+        self.set_hexpand(True)
         self.on_jump = on_jump
         self.on_open_history = on_open_history
         self.on_open_markdown = on_open_markdown
@@ -424,24 +443,21 @@ class DocumentSidebar(Gtk.Box):
         self.on_choose_markdown_folder = on_choose_markdown_folder
         self.on_rescan_markdown_folder = on_rescan_markdown_folder
 
-        title = Gtk.Label(label="Documents", xalign=0)
-        title.set_margin_top(10)
-        title.set_margin_bottom(6)
-        title.set_margin_start(10)
-        title.set_margin_end(10)
-        title.get_style_context().add_class("dim-label")
-        self.pack_start(title, False, False, 0)
-
         self.split_paned = Gtk.Paned(orientation=Gtk.Orientation.VERTICAL)
         self.split_paned.set_wide_handle(True)
 
         history_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         self.history_listbox = Gtk.ListBox()
+        self.history_listbox.set_hexpand(True)
         self.history_listbox.set_activate_on_single_click(True)
         self.history_listbox.connect("row-activated", self._on_history_row)
         history_scroller = Gtk.ScrolledWindow()
-        history_scroller.set_hexpand(False)
+        history_scroller.set_hexpand(True)
         history_scroller.set_vexpand(True)
+        history_scroller.set_policy(
+            Gtk.PolicyType.NEVER,
+            Gtk.PolicyType.AUTOMATIC,
+        )
         history_scroller.add(self.history_listbox)
         history_box.pack_start(self._section_label("Recent documents"), False, False, 0)
         history_box.pack_start(history_scroller, True, True, 0)
@@ -452,11 +468,11 @@ class DocumentSidebar(Gtk.Box):
         folder_header.set_margin_bottom(4)
         folder_header.set_margin_start(10)
         folder_header.set_margin_end(8)
-        folder_label = Gtk.Label(label="Folder tree", xalign=0)
+        folder_label = _shrink_label("Folder tree")
         folder_label.get_style_context().add_class("dim-label")
         folder_header.pack_start(folder_label, True, True, 0)
         choose_file_btn = _icon_button(
-            "document-open-symbolic",
+            "text-x-generic-symbolic",
             "Choose a markdown file and show its folder",
             self.on_choose_markdown_file,
         )
@@ -474,26 +490,28 @@ class DocumentSidebar(Gtk.Box):
         folder_header.pack_start(choose_btn, False, False, 0)
         folder_header.pack_start(rescan_btn, False, False, 0)
 
-        self.markdown_folder_label = Gtk.Label(label="No folder selected", xalign=0)
-        self.markdown_folder_label.set_ellipsize(Pango.EllipsizeMode.MIDDLE)
+        self.markdown_folder_label = _shrink_label(
+            "No folder selected",
+            ellipsize=Pango.EllipsizeMode.MIDDLE,
+        )
         self.markdown_folder_label.get_style_context().add_class("dim-label")
         self.markdown_folder_label.set_margin_start(10)
         self.markdown_folder_label.set_margin_end(10)
 
-        self.markdown_status_label = Gtk.Label(label="", xalign=0)
-        self.markdown_status_label.set_ellipsize(Pango.EllipsizeMode.END)
+        self.markdown_status_label = _shrink_label("")
         self.markdown_status_label.get_style_context().add_class("dim-label")
         self.markdown_status_label.set_margin_start(10)
         self.markdown_status_label.set_margin_end(10)
         self.markdown_status_label.set_margin_bottom(6)
 
         self.folder_listbox = Gtk.ListBox()
+        self.folder_listbox.set_hexpand(True)
         self.folder_listbox.set_selection_mode(Gtk.SelectionMode.NONE)
         self.folder_listbox.set_activate_on_single_click(True)
         self.folder_listbox.connect("row-activated", self._on_folder_tree_row)
 
         self.folder_scroller = Gtk.ScrolledWindow()
-        self.folder_scroller.set_hexpand(False)
+        self.folder_scroller.set_hexpand(True)
         self.folder_scroller.set_vexpand(True)
         self.folder_scroller.set_policy(
             Gtk.PolicyType.NEVER,
@@ -525,22 +543,26 @@ class DocumentSidebar(Gtk.Box):
         row = Gtk.ListBoxRow()
         row.file_path = file_path
         row.set_tooltip_text(tooltip or name)
+        row.set_hexpand(True)
         box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        box.set_hexpand(True)
+        box.set_halign(Gtk.Align.FILL)
         box.set_margin_top(3)
         box.set_margin_bottom(3)
         box.set_margin_start(8)
         box.set_margin_end(8)
         indent = Gtk.Box()
-        indent.set_size_request(min(depth, 4) * 12, 1)
+        indent.set_size_request(
+            min(depth * SIDEBAR_INDENT_STEP, SIDEBAR_INDENT_MAX),
+            1,
+        )
         box.pack_start(indent, False, False, 0)
         icon = Gtk.Image.new_from_icon_name(
             "folder-symbolic" if folder else "text-x-generic-symbolic",
             Gtk.IconSize.MENU,
         )
         box.pack_start(icon, False, False, 0)
-        label = Gtk.Label(label=name, xalign=0)
-        label.set_ellipsize(Pango.EllipsizeMode.END)
-        label.set_single_line_mode(True)
+        label = _shrink_label(name)
         box.pack_start(label, True, True, 0)
         row.add(box)
         return row
@@ -564,7 +586,7 @@ class DocumentSidebar(Gtk.Box):
         if not paths:
             row = Gtk.ListBoxRow()
             row.file_path = None
-            lbl = Gtk.Label(label="No recent files yet", xalign=0)
+            lbl = _shrink_label("No recent files yet")
             lbl.set_margin_top(8)
             lbl.set_margin_bottom(8)
             lbl.set_margin_start(10)
@@ -578,14 +600,14 @@ class DocumentSidebar(Gtk.Box):
             row = Gtk.ListBoxRow()
             row.file_path = p
             box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+            box.set_hexpand(True)
+            box.set_halign(Gtk.Align.FILL)
             box.set_margin_top(6)
             box.set_margin_bottom(6)
             box.set_margin_start(8)
             box.set_margin_end(8)
-            name = Gtk.Label(label=p.name, xalign=0)
-            name.set_ellipsize(Pango.EllipsizeMode.END)
-            sub = Gtk.Label(label=str(p), xalign=0)
-            sub.set_ellipsize(Pango.EllipsizeMode.MIDDLE)
+            name = _shrink_label(p.name)
+            sub = _shrink_label(str(p), ellipsize=Pango.EllipsizeMode.MIDDLE)
             sub.get_style_context().add_class("dim-label")
             box.pack_start(name, False, False, 0)
             box.pack_start(sub, False, False, 0)
@@ -683,7 +705,6 @@ class Viewer(Gtk.ApplicationWindow):
         self._wordcount_timer: int | None = None
         self._headings_cache: list[dict] = []
         self.outline_visible = False
-        self._suppress_sidebar_toggle = False
         self._sidebar_width = 300
         self.typewriter_on = False
         self._history: list[tuple[Path, int]] = []
@@ -734,6 +755,23 @@ class Viewer(Gtk.ApplicationWindow):
         self._apply_source_style()
         self._refresh_preview()
 
+    def _sidebar_icon(self):
+        return "sidebar-hide-symbolic" if self.outline_visible else "sidebar-show-symbolic"
+
+    def _sync_sidebar_button(self):
+        if hasattr(self, "sidebar_btn"):
+            self.sidebar_btn.set_image(
+                Gtk.Image.new_from_icon_name(
+                    self._sidebar_icon(),
+                    Gtk.IconSize.BUTTON,
+                )
+            )
+            self.sidebar_btn.set_tooltip_text(
+                "Hide sidebar (Ctrl+Shift+O)"
+                if self.outline_visible else
+                "Show sidebar (Ctrl+Shift+O)"
+            )
+
     # ---- header -------------------------------------------------------------
 
     def _build_header(self):
@@ -752,10 +790,10 @@ class Viewer(Gtk.ApplicationWindow):
                 "document-open-symbolic",
                 "Open (Ctrl+O)",
                 self._on_open_clicked))
-        self.sidebar_btn = _toggle_icon(
-            "view-sidebar-symbolic",
-            "Sidebar (Ctrl+Shift+O)")
-        self.sidebar_btn.connect("toggled", self._on_sidebar_button_toggled)
+        self.sidebar_btn = _icon_button(
+            self._sidebar_icon(),
+            "Show sidebar (Ctrl+Shift+O)",
+            lambda *_: self._toggle_outline())
         header.pack_start(self.sidebar_btn)
         self.edit_btn = _toggle_icon(
             "document-edit-symbolic",
@@ -1053,26 +1091,23 @@ class Viewer(Gtk.ApplicationWindow):
             on_rescan_markdown_folder=self._scan_markdown_folder,
         )
         self.outline_revealer = Gtk.Revealer()
+        self.outline_revealer.set_no_show_all(True)
         self.outline_revealer.set_transition_type(
-            Gtk.RevealerTransitionType.SLIDE_RIGHT)
+            Gtk.RevealerTransitionType.CROSSFADE)
         self.outline_revealer.set_transition_duration(140)
         self.outline_revealer.add(self.outline)
+        self.outline_revealer.hide()
 
     def _toggle_outline(self, *_):
         self._set_sidebar_visible(not self.outline_visible)
 
-    def _on_sidebar_button_toggled(self, btn):
-        if self._suppress_sidebar_toggle:
-            return
-        self._set_sidebar_visible(btn.get_active())
-
     def _set_sidebar_visible(self, visible: bool):
         self.outline_visible = visible
+        if visible:
+            self.outline.show_all()
+            self.outline_revealer.show()
         self.outline_revealer.set_reveal_child(visible)
-        if hasattr(self, "sidebar_btn") and self.sidebar_btn.get_active() != visible:
-            self._suppress_sidebar_toggle = True
-            self.sidebar_btn.set_active(visible)
-            self._suppress_sidebar_toggle = False
+        self._sync_sidebar_button()
         if visible:
             self._refresh_history_sidebar()
             if self.current_path:
@@ -1083,16 +1118,17 @@ class Viewer(Gtk.ApplicationWindow):
             pos = self.middle_paned.get_position()
             if pos > 80:
                 self._sidebar_width = pos
+            self.outline_revealer.hide()
             self.middle_paned.set_position(0)
 
     def _restore_sidebar_paned_position(self):
         if hasattr(self, "middle_paned"):
             width = getattr(self, "_sidebar_width", 300)
-            self.middle_paned.set_position(max(160, width))
+            self.middle_paned.set_position(max(SIDEBAR_MIN_WIDTH, width))
         return False
 
     def _on_sidebar_paned_position_changed(self, paned, _pspec):
-        if self.outline_visible and paned.get_position() > 80:
+        if self.outline_visible and paned.get_position() >= SIDEBAR_MIN_WIDTH:
             self._sidebar_width = paned.get_position()
 
     def _ensure_sidebar_folder_for_file(
@@ -1280,7 +1316,7 @@ class Viewer(Gtk.ApplicationWindow):
             "notify::position",
             self._on_sidebar_paned_position_changed,
         )
-        self.middle_paned.pack1(self.outline_revealer, resize=False, shrink=True)
+        self.middle_paned.pack1(self.outline_revealer, resize=False, shrink=False)
         self.content_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
         self.middle_paned.pack2(self.content_box, resize=True, shrink=False)
         self.middle_paned.set_position(0)

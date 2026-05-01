@@ -1,3 +1,13 @@
+vertexwrite (0.6.9+noble1) noble; urgency=medium
+
+  * Regenerate app icons from vertex-logo.png with transparent backgrounds.
+  * Fix sidebar hiding so it collapses fully when disabled.
+  * Keep sidebar resizing left-aligned and clamp it to a safe minimum width.
+  * Remove the redundant Documents heading from the document sidebar.
+  * Use clearer file and sidebar show/hide icons in the GTK UI.
+
+ -- Mark <mark@canarybuilds.com>  Fri, 01 May 2026 00:00:00 +0800
+
 vertexwrite (0.6.8+noble1) noble; urgency=medium
 
   * Update the icon set to the new blue VertexWrite logo.

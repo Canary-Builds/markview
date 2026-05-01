@@ -48,7 +48,7 @@ from vertexwrite_core import (  # noqa: E402
     write_snapshot as _write_snapshot,
 )
 
-__version__ = "0.6.6"
+__version__ = "0.6.7"
 
 APP_ID = "com.canarybuilds.VertexWrite"
 APP_NAME = "VertexWrite"
@@ -490,13 +490,22 @@ class DocumentSidebar(Gtk.Box):
         self.folder_store = Gtk.TreeStore(str, str, str)
         self.folder_tree = Gtk.TreeView(model=self.folder_store)
         self.folder_tree.set_headers_visible(False)
-        self.folder_tree.set_level_indentation(8)
+        self.folder_tree.set_level_indentation(0)
         self.folder_tree.set_tooltip_column(2)
         try:
             self.folder_tree.set_enable_tree_lines(True)
         except AttributeError:
             pass
+        expander_renderer = Gtk.CellRendererText()
+        expander_column = Gtk.TreeViewColumn("", expander_renderer)
+        expander_column.set_sizing(Gtk.TreeViewColumnSizing.FIXED)
+        expander_column.set_fixed_width(24)
+        expander_column.set_min_width(24)
+        expander_column.set_max_width(24)
+        self.folder_tree.append_column(expander_column)
+        self.folder_tree.set_expander_column(expander_column)
         renderer = Gtk.CellRendererText()
+        renderer.set_property("ellipsize", Pango.EllipsizeMode.MIDDLE)
         column = Gtk.TreeViewColumn("File", renderer, text=0)
         column.set_expand(True)
         self.folder_tree.append_column(column)
@@ -508,10 +517,6 @@ class DocumentSidebar(Gtk.Box):
         self.folder_scroller.set_policy(
             Gtk.PolicyType.AUTOMATIC,
             Gtk.PolicyType.AUTOMATIC,
-        )
-        self.folder_scroller.connect(
-            "size-allocate",
-            lambda *_: GLib.idle_add(self._scroll_folder_tree_to_names),
         )
         self.folder_scroller.add(self.folder_tree)
 
@@ -527,13 +532,6 @@ class DocumentSidebar(Gtk.Box):
 
         self.update_history([])
         self.set_markdown_results(None, [], False, "Choose a folder to scan markdown files.")
-
-    def _scroll_folder_tree_to_names(self):
-        adj = self.folder_scroller.get_hadjustment()
-        max_value = max(adj.get_lower(), adj.get_upper() - adj.get_page_size())
-        if adj.get_value() != max_value:
-            adj.set_value(max_value)
-        return False
 
     def _section_label(self, text):
         label = Gtk.Label(label=text, xalign=0)
@@ -633,7 +631,6 @@ class DocumentSidebar(Gtk.Box):
                 ],
             )
         self.folder_tree.expand_all()
-        GLib.idle_add(self._scroll_folder_tree_to_names)
 
     def _on_history_row(self, _lb, row):
         path = getattr(row, "file_path", None)

@@ -6,6 +6,11 @@ versioning follows [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.6.7] — 2026-05-01
+
+### Fixed
+- The sidebar folder tree now separates the tree expander gutter from the file/folder name column, so narrowing the sidebar clips the tree gutter before it clips names.
+
 ## [0.6.6] — 2026-05-01
 
 ### Fixed

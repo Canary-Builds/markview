@@ -1,3 +1,10 @@
+vertexwrite (0.6.7+noble1) noble; urgency=medium
+
+  * Separate the folder-tree gutter from the name column so sidebar resizing
+    preserves visible file and folder names.
+
+ -- Mark <mark@canarybuilds.com>  Fri, 01 May 2026 00:00:00 +0800
+
 vertexwrite (0.6.6+noble1) noble; urgency=medium
 
   * Keep folder-tree names visible when resizing the sidebar.

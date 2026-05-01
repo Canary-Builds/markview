@@ -43,8 +43,8 @@ from PyQt6.QtWebEngineCore import QWebEnginePage
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWidgets import (
     QApplication, QDialog, QDialogButtonBox, QDockWidget, QFileDialog,
-    QGridLayout, QHBoxLayout, QInputDialog, QLabel, QLineEdit, QListWidget,
-    QListWidgetItem, QMainWindow, QMenu, QMenuBar, QMessageBox,
+    QGridLayout, QHBoxLayout, QHeaderView, QInputDialog, QLabel, QLineEdit,
+    QListWidget, QListWidgetItem, QMainWindow, QMenu, QMenuBar, QMessageBox,
     QPlainTextEdit, QPushButton, QSizePolicy, QSpinBox, QSplitter,
     QStatusBar, QTabWidget, QToolBar, QToolButton, QTreeWidget,
     QTreeWidgetItem, QVBoxLayout, QWidget,
@@ -68,7 +68,7 @@ from vertexwrite_core import (
     write_snapshot as _write_snapshot,
 )
 
-__version__ = "0.6.6"
+__version__ = "0.6.7"
 
 APP_NAME = "VertexWrite"
 APP_SLUG = "vertexwrite"
@@ -621,11 +621,14 @@ class DocumentSidebar(QWidget):
         folder_layout.addWidget(self.md_status_label)
 
         self.folder_tree = QTreeWidget()
+        self.folder_tree.setColumnCount(2)
         self.folder_tree.setHeaderHidden(True)
-        self.folder_tree.setIndentation(8)
-        self.folder_tree.setTextElideMode(Qt.TextElideMode.ElideNone)
-        self.folder_tree.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self.folder_tree.setIndentation(0)
+        self.folder_tree.setTextElideMode(Qt.TextElideMode.ElideMiddle)
+        header = self.folder_tree.header()
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Fixed)
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        self.folder_tree.setColumnWidth(0, 24)
         self.folder_tree.itemClicked.connect(self._on_folder_tree_clicked)
         folder_layout.addWidget(self.folder_tree, 1)
 
@@ -634,14 +637,7 @@ class DocumentSidebar(QWidget):
         self.splitter.setStretchFactor(0, 0)
         self.splitter.setStretchFactor(1, 1)
         self.splitter.setSizes([220, 520])
-        self.splitter.splitterMoved.connect(
-            lambda *_: QTimer.singleShot(0, self._scroll_folder_tree_to_names))
         layout.addWidget(self.splitter, 1)
-
-    def _scroll_folder_tree_to_names(self):
-        self.folder_tree.resizeColumnToContents(0)
-        bar = self.folder_tree.horizontalScrollBar()
-        bar.setValue(bar.maximum())
 
     def update_outline(self, headings: list[dict]):
         # Kept for existing call sites; heading jumps remain in the palette.
@@ -664,13 +660,13 @@ class DocumentSidebar(QWidget):
         self.md_folder_label.setText(str(root) if root else "No folder selected")
         self.md_status_label.setText(status)
         if root is None:
-            item = QTreeWidgetItem(["No folder selected"])
-            item.setToolTip(0, "No folder selected")
+            item = QTreeWidgetItem(["", "No folder selected"])
+            item.setToolTip(1, "No folder selected")
             self.folder_tree.addTopLevelItem(item)
             return
         if not files:
-            item = QTreeWidgetItem(["No markdown files"])
-            item.setToolTip(0, "No markdown files")
+            item = QTreeWidgetItem(["", "No markdown files"])
+            item.setToolTip(1, "No markdown files")
             self.folder_tree.addTopLevelItem(item)
             return
         root_resolved = root.resolve()
@@ -685,27 +681,26 @@ class DocumentSidebar(QWidget):
             for depth, folder in enumerate(parts[:-1]):
                 key = parts[:depth + 1]
                 if key not in folder_nodes:
-                    node = QTreeWidgetItem([folder])
-                    node.setToolTip(0, str(root_resolved.joinpath(*key)))
+                    node = QTreeWidgetItem(["", folder])
+                    node.setToolTip(1, str(root_resolved.joinpath(*key)))
                     if parent is None:
                         self.folder_tree.addTopLevelItem(node)
                     else:
                         parent.addChild(node)
                     folder_nodes[key] = node
                 parent = folder_nodes[key]
-            item = QTreeWidgetItem([parts[-1]])
-            item.setData(0, Qt.ItemDataRole.UserRole, str(f))
-            item.setToolTip(0, str(f))
+            item = QTreeWidgetItem(["", parts[-1]])
+            item.setData(1, Qt.ItemDataRole.UserRole, str(f))
+            item.setToolTip(1, str(f))
             if parent is None:
                 self.folder_tree.addTopLevelItem(item)
             else:
                 parent.addChild(item)
         if truncated:
-            item = QTreeWidgetItem(["Scan limit reached; showing partial results."])
-            item.setToolTip(0, "Scan limit reached; showing partial results.")
+            item = QTreeWidgetItem(["", "Scan limit reached; showing partial results."])
+            item.setToolTip(1, "Scan limit reached; showing partial results.")
             self.folder_tree.addTopLevelItem(item)
         self.folder_tree.expandAll()
-        QTimer.singleShot(0, self._scroll_folder_tree_to_names)
 
     def _on_history_clicked(self, item):
         path = item.data(Qt.ItemDataRole.UserRole)
@@ -713,7 +708,7 @@ class DocumentSidebar(QWidget):
             self.fileOpenRequested.emit(path)
 
     def _on_folder_tree_clicked(self, item):
-        path = item.data(0, Qt.ItemDataRole.UserRole)
+        path = item.data(1, Qt.ItemDataRole.UserRole)
         if path is not None:
             self.fileOpenRequested.emit(path)
 

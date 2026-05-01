@@ -59,7 +59,7 @@ from vertexwrite_core import (  # noqa: E402
     write_snapshot as _write_snapshot,
 )
 
-__version__ = "0.7.2"
+__version__ = "0.7.3"
 
 APP_ID = "com.canarybuilds.VertexWrite"
 APP_NAME = "VertexWrite"
@@ -2664,8 +2664,8 @@ class Viewer(Gtk.ApplicationWindow):
             else:
                 break
         if slug:
-            js = f"window.vertexWrite && window.vertexWrite.scrollToAnchor({
-                json.dumps(slug)});"
+            slug_json = json.dumps(slug)
+            js = f"window.vertexWrite && window.vertexWrite.scrollToAnchor({slug_json});"
             try:
                 self.webview.run_javascript(js, None, None, None)
             except Exception:
@@ -3473,8 +3473,7 @@ class Viewer(Gtk.ApplicationWindow):
             "html": "html",
             "epub": "epub"}[fmt]
         dialog = Gtk.FileChooserDialog(
-            title=f"Export as {
-                fmt.upper()}",
+            title=f"Export as {fmt.upper()}",
             parent=self,
             action=Gtk.FileChooserAction.SAVE)
         dialog.add_buttons(

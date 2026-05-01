@@ -6,6 +6,11 @@ versioning follows [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.7.3] — 2026-05-01
+
+### Fixed
+- Fixed Linux packaging builds on Ubuntu 22.04 Jammy by removing Python 3.12-only f-string syntax from the GTK entry point.
+
 ## [0.7.2] — 2026-05-01
 
 ### Security

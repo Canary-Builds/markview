@@ -18,12 +18,12 @@ VSVersionInfo(
           [
             StringStruct(u'CompanyName', u'Canary Builds'),
             StringStruct(u'FileDescription', u'VertexWrite — Markdown Viewer & Editor'),
-            StringStruct(u'FileVersion', u'0.7.2.0'),
+            StringStruct(u'FileVersion', u'0.7.3.0'),
             StringStruct(u'InternalName', u'vertexwrite'),
             StringStruct(u'LegalCopyright', u'Copyright (c) 2026 Canary Builds'),
             StringStruct(u'OriginalFilename', u'vertexwrite.exe'),
             StringStruct(u'ProductName', u'VertexWrite'),
-            StringStruct(u'ProductVersion', u'0.7.2.0'),
+            StringStruct(u'ProductVersion', u'0.7.3.0'),
           ]
         )
       ]

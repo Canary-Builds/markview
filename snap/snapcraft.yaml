@@ -1,6 +1,6 @@
 name: vertexwrite
 base: core24
-version: "0.6.5"
+version: "0.6.6"
 title: VertexWrite
 summary: Minimal modern markdown viewer and editor
 description: |

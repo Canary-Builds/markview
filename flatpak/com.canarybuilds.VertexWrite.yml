@@ -45,7 +45,7 @@ modules:
     sources:
       - type: git
         url: https://github.com/Canary-Builds/vertexwrite.git
-        tag: v0.6.5
+        tag: v0.6.6
       - type: file
         path: vertexwrite-wrapper
       - type: file

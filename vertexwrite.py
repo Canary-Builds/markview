@@ -48,7 +48,7 @@ from vertexwrite_core import (  # noqa: E402
     write_snapshot as _write_snapshot,
 )
 
-__version__ = "0.6.5"
+__version__ = "0.6.6"
 
 APP_ID = "com.canarybuilds.VertexWrite"
 APP_NAME = "VertexWrite"
@@ -487,9 +487,11 @@ class DocumentSidebar(Gtk.Box):
         self.markdown_status_label.set_margin_end(10)
         self.markdown_status_label.set_margin_bottom(6)
 
-        self.folder_store = Gtk.TreeStore(str, str)
+        self.folder_store = Gtk.TreeStore(str, str, str)
         self.folder_tree = Gtk.TreeView(model=self.folder_store)
         self.folder_tree.set_headers_visible(False)
+        self.folder_tree.set_level_indentation(8)
+        self.folder_tree.set_tooltip_column(2)
         try:
             self.folder_tree.set_enable_tree_lines(True)
         except AttributeError:
@@ -500,15 +502,23 @@ class DocumentSidebar(Gtk.Box):
         self.folder_tree.append_column(column)
         self.folder_tree.connect("row-activated", self._on_folder_tree_row)
 
-        folder_scroller = Gtk.ScrolledWindow()
-        folder_scroller.set_hexpand(False)
-        folder_scroller.set_vexpand(True)
-        folder_scroller.add(self.folder_tree)
+        self.folder_scroller = Gtk.ScrolledWindow()
+        self.folder_scroller.set_hexpand(False)
+        self.folder_scroller.set_vexpand(True)
+        self.folder_scroller.set_policy(
+            Gtk.PolicyType.AUTOMATIC,
+            Gtk.PolicyType.AUTOMATIC,
+        )
+        self.folder_scroller.connect(
+            "size-allocate",
+            lambda *_: GLib.idle_add(self._scroll_folder_tree_to_names),
+        )
+        self.folder_scroller.add(self.folder_tree)
 
         folder_box.pack_start(folder_header, False, False, 0)
         folder_box.pack_start(self.markdown_folder_label, False, False, 0)
         folder_box.pack_start(self.markdown_status_label, False, False, 0)
-        folder_box.pack_start(folder_scroller, True, True, 0)
+        folder_box.pack_start(self.folder_scroller, True, True, 0)
 
         self.split_paned.pack1(history_box, resize=True, shrink=False)
         self.split_paned.pack2(folder_box, resize=True, shrink=False)
@@ -517,6 +527,13 @@ class DocumentSidebar(Gtk.Box):
 
         self.update_history([])
         self.set_markdown_results(None, [], False, "Choose a folder to scan markdown files.")
+
+    def _scroll_folder_tree_to_names(self):
+        adj = self.folder_scroller.get_hadjustment()
+        max_value = max(adj.get_lower(), adj.get_upper() - adj.get_page_size())
+        if adj.get_value() != max_value:
+            adj.set_value(max_value)
+        return False
 
     def _section_label(self, text):
         label = Gtk.Label(label=text, xalign=0)
@@ -576,10 +593,16 @@ class DocumentSidebar(Gtk.Box):
         self.markdown_folder_label.set_text(str(root) if root else "No folder selected")
         self.markdown_status_label.set_text(status)
         if root is None:
-            self.folder_store.append(None, ["No folder selected", ""])
+            self.folder_store.append(
+                None,
+                ["No folder selected", "", "No folder selected"],
+            )
             return
         if not files:
-            self.folder_store.append(None, ["No markdown files", ""])
+            self.folder_store.append(
+                None,
+                ["No markdown files", "", "No markdown files"],
+            )
             return
         root_resolved = root.resolve()
         folder_nodes = {}
@@ -593,18 +616,24 @@ class DocumentSidebar(Gtk.Box):
             for depth, folder in enumerate(parts[:-1]):
                 key = parts[:depth + 1]
                 if key not in folder_nodes:
+                    tooltip = str(root_resolved.joinpath(*key))
                     folder_nodes[key] = self.folder_store.append(
                         parent,
-                        [folder, ""],
+                        [folder, "", tooltip],
                     )
                 parent = folder_nodes[key]
-            self.folder_store.append(parent, [parts[-1], str(f)])
+            self.folder_store.append(parent, [parts[-1], str(f), str(f)])
         if truncated:
             self.folder_store.append(
                 None,
-                ["Scan limit reached; showing partial results.", ""],
+                [
+                    "Scan limit reached; showing partial results.",
+                    "",
+                    "Scan limit reached; showing partial results.",
+                ],
             )
         self.folder_tree.expand_all()
+        GLib.idle_add(self._scroll_folder_tree_to_names)
 
     def _on_history_row(self, _lb, row):
         path = getattr(row, "file_path", None)

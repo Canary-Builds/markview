@@ -4,7 +4,7 @@
 > GTK3 + WebKit on Linux. PyQt6 + QtWebEngine on Windows.
 > No Electron, no tray daemon, no account. Starts in under a second.
 
-[![version](https://img.shields.io/badge/version-0.6.5-blue)](CHANGELOG.md)
+[![version](https://img.shields.io/badge/version-0.6.6-blue)](CHANGELOG.md)
 [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![platform](https://img.shields.io/badge/platform-Linux%20%7C%20Windows-lightgrey)](#install)
 [![snap](https://img.shields.io/badge/Snapcraft-vertexwrite-E95420?logo=snapcraft&logoColor=white)](https://snapcraft.io/vertexwrite)

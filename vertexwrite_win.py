@@ -68,7 +68,7 @@ from vertexwrite_core import (
     write_snapshot as _write_snapshot,
 )
 
-__version__ = "0.6.5"
+__version__ = "0.6.6"
 
 APP_NAME = "VertexWrite"
 APP_SLUG = "vertexwrite"
@@ -622,6 +622,10 @@ class DocumentSidebar(QWidget):
 
         self.folder_tree = QTreeWidget()
         self.folder_tree.setHeaderHidden(True)
+        self.folder_tree.setIndentation(8)
+        self.folder_tree.setTextElideMode(Qt.TextElideMode.ElideNone)
+        self.folder_tree.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.folder_tree.itemClicked.connect(self._on_folder_tree_clicked)
         folder_layout.addWidget(self.folder_tree, 1)
 
@@ -630,7 +634,14 @@ class DocumentSidebar(QWidget):
         self.splitter.setStretchFactor(0, 0)
         self.splitter.setStretchFactor(1, 1)
         self.splitter.setSizes([220, 520])
+        self.splitter.splitterMoved.connect(
+            lambda *_: QTimer.singleShot(0, self._scroll_folder_tree_to_names))
         layout.addWidget(self.splitter, 1)
+
+    def _scroll_folder_tree_to_names(self):
+        self.folder_tree.resizeColumnToContents(0)
+        bar = self.folder_tree.horizontalScrollBar()
+        bar.setValue(bar.maximum())
 
     def update_outline(self, headings: list[dict]):
         # Kept for existing call sites; heading jumps remain in the palette.
@@ -653,10 +664,14 @@ class DocumentSidebar(QWidget):
         self.md_folder_label.setText(str(root) if root else "No folder selected")
         self.md_status_label.setText(status)
         if root is None:
-            self.folder_tree.addTopLevelItem(QTreeWidgetItem(["No folder selected"]))
+            item = QTreeWidgetItem(["No folder selected"])
+            item.setToolTip(0, "No folder selected")
+            self.folder_tree.addTopLevelItem(item)
             return
         if not files:
-            self.folder_tree.addTopLevelItem(QTreeWidgetItem(["No markdown files"]))
+            item = QTreeWidgetItem(["No markdown files"])
+            item.setToolTip(0, "No markdown files")
+            self.folder_tree.addTopLevelItem(item)
             return
         root_resolved = root.resolve()
         folder_nodes = {}
@@ -671,6 +686,7 @@ class DocumentSidebar(QWidget):
                 key = parts[:depth + 1]
                 if key not in folder_nodes:
                     node = QTreeWidgetItem([folder])
+                    node.setToolTip(0, str(root_resolved.joinpath(*key)))
                     if parent is None:
                         self.folder_tree.addTopLevelItem(node)
                     else:
@@ -679,14 +695,17 @@ class DocumentSidebar(QWidget):
                 parent = folder_nodes[key]
             item = QTreeWidgetItem([parts[-1]])
             item.setData(0, Qt.ItemDataRole.UserRole, str(f))
+            item.setToolTip(0, str(f))
             if parent is None:
                 self.folder_tree.addTopLevelItem(item)
             else:
                 parent.addChild(item)
         if truncated:
-            self.folder_tree.addTopLevelItem(
-                QTreeWidgetItem(["Scan limit reached; showing partial results."]))
+            item = QTreeWidgetItem(["Scan limit reached; showing partial results."])
+            item.setToolTip(0, "Scan limit reached; showing partial results.")
+            self.folder_tree.addTopLevelItem(item)
         self.folder_tree.expandAll()
+        QTimer.singleShot(0, self._scroll_folder_tree_to_names)
 
     def _on_history_clicked(self, item):
         path = item.data(Qt.ItemDataRole.UserRole)

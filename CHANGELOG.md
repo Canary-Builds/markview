@@ -6,6 +6,11 @@ versioning follows [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.6.6] — 2026-05-01
+
+### Fixed
+- Resizing the sidebar now keeps folder-tree names visible instead of clipping the right side of deeply indented rows first.
+
 ## [0.6.5] — 2026-05-01
 
 ### Added

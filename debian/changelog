@@ -1,3 +1,9 @@
+vertexwrite (0.6.6+noble1) noble; urgency=medium
+
+  * Keep folder-tree names visible when resizing the sidebar.
+
+ -- Mark <mark@canarybuilds.com>  Fri, 01 May 2026 00:00:00 +0800
+
 vertexwrite (0.6.5+noble1) noble; urgency=medium
 
   * Regenerate app icons from the final VertexWrite logo.

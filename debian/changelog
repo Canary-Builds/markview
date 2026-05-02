@@ -1,3 +1,10 @@
+vertexwrite (0.7.4+noble1) noble; urgency=medium
+
+  * Add upstream Meson install rules for Linux packaging.
+  * Update Flatpak packaging to use generated Python dependency metadata.
+
+ -- Canary Builds <contact@canarybuilds.com>  Sat, 02 May 2026 18:40:00 +0800
+
 vertexwrite (0.7.3+noble1) noble; urgency=medium
 
   * Fix Linux package builds on Ubuntu 22.04 Jammy by removing Python 3.12-only

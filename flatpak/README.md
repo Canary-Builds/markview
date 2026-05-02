@@ -10,7 +10,7 @@ cd /path/to/vertexwrite
 flatpak run --command=flathub-build org.flatpak.Builder flatpak/com.canarybuilds.VertexWrite.yml
 ```
 
-Optional policy checks:
+Required policy checks before submitting or updating the PR:
 
 ```bash
 flatpak run --command=flatpak-builder-lint org.flatpak.Builder manifest flatpak/com.canarybuilds.VertexWrite.yml
@@ -21,6 +21,25 @@ flatpak run --command=flatpak-builder-lint org.flatpak.Builder repo repo
 
 `gtksourceview4` is built in the Flatpak because VertexWrite is a GTK 3 app and
 GtkSourceView 5 loads GTK 4.
+
+## Regenerate Python dependencies
+
+Python dependencies are generated with `flatpak-builder-tools` instead of
+maintaining wheel URLs by hand:
+
+```bash
+flatpak-pip-generator \
+  --runtime=org.gnome.Sdk//50 \
+  --requirements-file=flatpak/requirements.txt \
+  --ignore-installed=markdown,pygments \
+  --prefer-wheels=bcrypt,cryptography,cffi,pynacl \
+  --wheel-arches=x86_64,aarch64 \
+  --output=flatpak/python3-requirements
+```
+
+`markdown` and `pygments` are ignored from the SDK so the Flatpak bundles the
+pinned versions used by VertexWrite. The compiled Paramiko dependencies use
+generator-managed wheels for both Flathub architectures.
 
 ## Create a distributable bundle (optional)
 

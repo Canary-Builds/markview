@@ -6,6 +6,14 @@ versioning follows [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.7.4] — 2026-05-02
+
+### Changed
+- Added upstream Meson install rules for Linux packaging, including the
+  launcher, desktop entry, AppStream metadata, icons, and application files.
+- Updated the Flatpak packaging to use generated Python dependency manifests
+  and the upstream Meson build system.
+
 ## [0.7.3] — 2026-05-01
 
 ### Fixed

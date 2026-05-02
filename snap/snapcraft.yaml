@@ -1,6 +1,6 @@
 name: vertexwrite
 base: core24
-version: "0.7.3"
+version: "0.7.4"
 title: VertexWrite
 summary: Markdown editor with local and SSH/SFTP file browsing
 description: |

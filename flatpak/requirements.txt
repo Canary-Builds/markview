@@ -1,4 +1,4 @@
-Markdown==3.7
-Pygments==2.18.0
-html2text==2024.2.26
+markdown==3.7
+pygments==2.18.0
+html2text==2025.4.15
 paramiko==4.0.0

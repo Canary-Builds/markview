@@ -1,6 +1,6 @@
 project(
   'vertexwrite',
-  version: '0.7.3',
+  version: '0.7.4',
   meson_version: '>=0.59.0',
 )
 

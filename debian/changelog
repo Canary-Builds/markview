@@ -1,3 +1,11 @@
+vertexwrite (0.7.5+noble1) noble; urgency=medium
+
+  * Update positioning around local and SSH/SFTP Markdown editing.
+  * Refresh README screenshots and shortcut/wiki documentation.
+  * Remove legacy Flatpak libdir overrides for current Flatpak Builder.
+
+ -- Canary Builds <contact@canarybuilds.com>  Sat, 02 May 2026 21:33:01 +0800
+
 vertexwrite (0.7.4+noble1) noble; urgency=medium
 
   * Add upstream Meson install rules for Linux packaging.

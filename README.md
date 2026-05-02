@@ -1,10 +1,10 @@
 # VertexWrite
 
-> Markdown editor with local and SSH/SFTP file browsing for Linux and Windows.
+> Edit Markdown wherever it lives: local folders or remote servers over SSH/SFTP on Linux.
 > GTK3 + WebKit on Linux. PyQt6 + QtWebEngine on Windows.
 > No Electron, no tray daemon, no account. Starts in under a second.
 
-[![version](https://img.shields.io/badge/version-0.7.4-blue)](CHANGELOG.md)
+[![version](https://img.shields.io/badge/version-0.7.5-blue)](CHANGELOG.md)
 [![license](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![platform](https://img.shields.io/badge/platform-Linux%20%7C%20Windows-lightgrey)](#install)
 [![snap](https://img.shields.io/badge/Snapcraft-vertexwrite-E95420?logo=snapcraft&logoColor=white)](https://snapcraft.io/vertexwrite)
@@ -18,22 +18,22 @@
 ## Screenshots
 
 <p align="center">
-  <a href="docs/screenshots/01-preview.png"><img src="docs/screenshots/01-preview.png" width="49%" alt="Reading view"></a>
-  <a href="docs/screenshots/02-split-view.png"><img src="docs/screenshots/02-split-view.png" width="49%" alt="Split view with live preview"></a>
+  <a href="docs/screenshots/01-preview.png"><img src="docs/screenshots/01-preview.png" width="49%" alt="Remote-first Markdown reading view"></a>
+  <a href="docs/screenshots/02-split-view.png"><img src="docs/screenshots/02-split-view.png" width="49%" alt="Split editor and live preview"></a>
 </p>
 <p align="center">
-  <a href="docs/screenshots/03-editor.png"><img src="docs/screenshots/03-editor.png" width="32%" alt="Editor with markdown syntax highlighting"></a>
+  <a href="docs/screenshots/03-editor.png"><img src="docs/screenshots/03-editor.png" width="32%" alt="Editor with local and SSH/SFTP sidebar"></a>
   <a href="docs/screenshots/04-dark-mode.png"><img src="docs/screenshots/04-dark-mode.png" width="32%" alt="Dark theme"></a>
-  <a href="docs/screenshots/05-command-palette.png"><img src="docs/screenshots/05-command-palette.png" width="32%" alt="Command palette (Ctrl+P)"></a>
+  <a href="docs/screenshots/05-command-palette.png"><img src="docs/screenshots/05-command-palette.png" width="32%" alt="Command palette with SSH/SFTP action"></a>
 </p>
 
-<p align="center"><sub>Reading view · Split view · Editor · Dark theme · Command palette (Ctrl+P)</sub></p>
+<p align="center"><sub>Remote-first reading · Split preview · Local/SSH sidebar · Dark theme · Command palette</sub></p>
 
 ---
 
 ## What it is
 
-A single Python app that turns any `.md` file into a clean, themeable reading view — hitting `Ctrl+E` flips it into a proper editor with a focused formatting toolbar, a command palette, folder-wide search, a document sidebar with recents, local and SSH/SFTP file browsing, live split-view preview with scroll-sync, auto-save snapshots, and live math / diagrams.
+A single Python app for opening Markdown wherever it lives: local folders or remote servers over SSH/SFTP on Linux. It turns any `.md` file into a clean, themeable reading view — hitting `Ctrl+E` flips it into a proper editor with a focused formatting toolbar, a command palette, folder-wide search, a document sidebar with recents, local and remote file browsing, live split-view preview with scroll-sync, auto-save snapshots, and live math / diagrams.
 
 The chrome stays minimal: compact header buttons, one toolbar that only appears in edit mode, and keyboard access for everything else.
 
@@ -70,7 +70,7 @@ The chrome stays minimal: compact header buttons, one toolbar that only appears 
 - **Back / forward** (`Alt+←` / `Alt+→`) — history of opened files + cursor lines
 
 ### Palette actions (Ctrl+P)
-Open / New / Save · Toggle edit / split / preview · Sidebar · Typewriter · Reload · Theme · Folder search · **Open from URL** · **Insert table** · **All tasks in folder** · **Backlinks to this file** · **Check links** · **Snapshot history** · **Export PDF / DOCX / HTML / EPUB** via pandoc.
+Open / New / Save · Toggle edit / split / preview · Sidebar · **Connect SSH/SFTP** · Typewriter · Reload · Theme · Folder search · **Open from URL** · **Insert table** · **All tasks in folder** · **Backlinks to this file** · **Check links** · **Snapshot history** · **Export PDF / DOCX / HTML / EPUB** via pandoc.
 
 ### Persistence
 - Every save writes a dated copy to `~/.local/state/vertexwrite/snapshots/`. Latest 30 per document; browse with the palette.
@@ -183,8 +183,8 @@ py .\vertexwrite_win.py README.md
 | `Ctrl+S` / `Ctrl+Shift+S` | Save / Save As |
 | `Ctrl+E` | Toggle edit mode |
 | `Ctrl+P` | Command palette |
-| `Ctrl+F` / `Ctrl+Shift+F` | Find in buffer / Search in folder |
-| `Ctrl+Shift+O` | Toggle document sidebar |
+| `Ctrl+F` / `Ctrl+Shift+F` | Find in buffer / Search current folder |
+| `Ctrl+Shift+O` | Toggle local/SSH sidebar |
 | `Ctrl+Shift+T` | Toggle typewriter mode |
 | `Ctrl+R` | Reload from disk |
 | `Ctrl+D` | Toggle theme |

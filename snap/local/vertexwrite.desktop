@@ -2,7 +2,7 @@
 Type=Application
 Name=VertexWrite
 GenericName=Markdown Editor
-Comment=Markdown editor with local and SSH/SFTP file browsing
+Comment=Edit Markdown locally or over SSH/SFTP
 Exec=vertexwrite %F
 Icon=vertexwrite
 Terminal=false

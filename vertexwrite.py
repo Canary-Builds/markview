@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""VertexWrite — minimal modern markdown viewer + editor for Linux."""
+"""VertexWrite — Markdown editing for local and SSH/SFTP files on Linux."""
 import os
 import re
 import sys
@@ -56,7 +56,7 @@ from vertexwrite_core import (  # noqa: E402
     write_snapshot as _write_snapshot,
 )
 
-__version__ = "0.7.4"
+__version__ = "0.7.5"
 
 APP_ID = "com.canarybuilds.VertexWrite"
 APP_NAME = "VertexWrite"
@@ -286,7 +286,7 @@ def save_markdown_root(path: Path | None):
 
 def welcome_html(theme: str) -> str:
     md_text = (
-        f"# VertexWrite\n\n*v{__version__} — markdown editing with local and SSH/SFTP file browsing.*\n\n"
+        f"# VertexWrite\n\n*v{__version__} — edit Markdown locally or over SSH/SFTP.*\n\n"
         '<div class="vw-actions">\n'
         '<button type="button" class="vw-action" data-vw-action="new">New document</button>\n'
         '<button type="button" class="vw-action secondary" data-vw-action="open">Open file</button>\n'
@@ -3012,6 +3012,7 @@ class Viewer(Gtk.ApplicationWindow):
             ("Split view (live preview)", "", "action:split"),
             ("Preview only", "", "action:preview_only"),
             ("Toggle sidebar", "Ctrl+Shift+O", "action:sidebar"),
+            ("Connect SSH/SFTP…", "", "action:remote"),
             ("Toggle typewriter mode", "Ctrl+Shift+T", "action:typewriter"),
             ("Reload", "Ctrl+R", "action:reload"),
             ("Toggle theme", "Ctrl+D", "action:theme"),
@@ -3118,6 +3119,7 @@ class Viewer(Gtk.ApplicationWindow):
                 "folder_search": lambda *_: self._open_folder_search(),
                 "outline": self._toggle_outline,
                 "sidebar": self._toggle_outline,
+                "remote": self._open_remote_from_welcome,
                 "typewriter": self._toggle_typewriter,
                 "open_url": self._open_from_url_prompt,
                 "insert_table": self._insert_table_prompt,
@@ -3728,7 +3730,7 @@ class Viewer(Gtk.ApplicationWindow):
         d = Gtk.AboutDialog(transient_for=self, modal=True)
         d.set_program_name(APP_NAME)
         d.set_version(__version__)
-        d.set_comments("Markdown editor with local and SSH/SFTP file browsing for Linux.")
+        d.set_comments("Edit Markdown wherever it lives: local folders or remote servers over SSH/SFTP.")
         d.set_copyright(f"© 2026 {DEVELOPER}")
         d.set_license_type(Gtk.License.MIT_X11)
         d.set_website(WEBSITE)
@@ -3829,14 +3831,14 @@ class Viewer(Gtk.ApplicationWindow):
         ]))
         section.add(group("View", [
             ("<Primary>e", "Toggle edit mode"),
-            ("<Primary><Shift>o", "Toggle sidebar"),
+            ("<Primary><Shift>o", "Toggle local/SSH sidebar"),
             ("<Primary><Shift>t", "Toggle typewriter mode"),
             ("<Primary>d", "Toggle theme"),
         ]))
         section.add(group("Navigation", [
             ("<Primary>p", "Command palette"),
             ("<Primary>f", "Find in buffer"),
-            ("<Primary><Shift>f", "Search in folder"),
+            ("<Primary><Shift>f", "Search current folder"),
             ("<Alt>Left", "Back"),
             ("<Alt>Right", "Forward"),
         ]))
@@ -3930,7 +3932,7 @@ class App(Gtk.Application):
 def parse_args(argv):
     parser = argparse.ArgumentParser(
         prog=APP_CLI,
-        description="Minimal modern markdown viewer + editor.")
+        description="Edit Markdown locally or over SSH/SFTP.")
     parser.add_argument("file", nargs="?", help="Path to a markdown file.")
     parser.add_argument("-V", "--version", action="version",
                         version=f"{APP_NAME} {__version__}")

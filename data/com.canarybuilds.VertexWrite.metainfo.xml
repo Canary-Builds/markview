@@ -2,7 +2,7 @@
 <component type="desktop-application">
   <id>com.canarybuilds.VertexWrite</id>
   <name>VertexWrite</name>
-  <summary>Markdown editor with local and SSH/SFTP file browsing</summary>
+  <summary>Edit Markdown locally or over SSH/SFTP</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>MIT</project_license>
   <developer id="com.canarybuilds">
@@ -13,22 +13,27 @@
   <url type="vcs-browser">https://github.com/Canary-Builds/vertexwrite</url>
   <url type="bugtracker">https://github.com/Canary-Builds/vertexwrite/issues</url>
   <description>
-    <p>VertexWrite is a lightweight GTK markdown editor for reading, editing, previewing, and organizing local or SSH/SFTP Markdown documents.</p>
-    <p>It focuses on fast startup, clean reading, local and SSH/SFTP file browsing, and practical writing workflows on Linux.</p>
+    <p>VertexWrite is a lightweight GTK Markdown editor for opening, editing, previewing, and organizing documents wherever they live: local folders or remote servers over SSH/SFTP.</p>
+    <p>It focuses on fast startup, clean reading, live split preview, and a sidebar that browses local and remote file trees without becoming a full notes database.</p>
     <ul>
       <li>Live preview while editing Markdown</li>
       <li>Syntax-highlighted editor with useful defaults</li>
-      <li>Local and remote file browsing through the sidebar</li>
+      <li>Local and SSH/SFTP file browsing through the sidebar</li>
     </ul>
   </description>
   <screenshots>
     <screenshot type="default">
-      <image>https://raw.githubusercontent.com/Canary-Builds/vertexwrite/v0.7.4/docs/screenshots/02-split-view.png</image>
+      <image>https://raw.githubusercontent.com/Canary-Builds/vertexwrite/v0.7.5/docs/screenshots/02-split-view.png</image>
       <caption>Split editor and live preview layout</caption>
     </screenshot>
   </screenshots>
   <content_rating type="oars-1.1" />
   <releases>
+    <release version="0.7.5" date="2026-05-02">
+      <description>
+        <p>Updated app store positioning, screenshots, shortcut documentation, and Flatpak metadata for the local and SSH/SFTP Markdown workflow.</p>
+      </description>
+    </release>
     <release version="0.7.4" date="2026-05-02">
       <description>
         <p>Added upstream Linux install rules and updated Flatpak packaging to use generated Python dependency metadata.</p>

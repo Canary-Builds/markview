@@ -1,6 +1,6 @@
 # VertexWrite Wiki
 
-Welcome. This is the living documentation for **VertexWrite** — a markdown editor with local and SSH/SFTP file browsing for Linux and Windows.
+Welcome. This is the living documentation for **VertexWrite** — a Markdown editor for opening, previewing, and editing documents in local folders or on remote servers over SSH/SFTP.
 
 > The wiki pages here are mirrored into the GitHub Wiki. Edit either, but open a PR for substantive doc changes so the canonical copy in `docs/wiki/` stays in sync.
 
@@ -14,6 +14,7 @@ Welcome. This is the living documentation for **VertexWrite** — a markdown edi
 
 - [Markdown Features](Markdown-Features.md) — tables, code, math, mermaid, transclusion, task checkboxes
 - [Architecture](Architecture.md) — how the renderer, editor, and bridge fit together
+- [Local and SSH/SFTP files](Architecture.md#storage-abstraction-and-sftp) — how remote browsing and saves work
 
 ## For contributors
 
@@ -28,4 +29,3 @@ Welcome. This is the living documentation for **VertexWrite** — a markdown edi
 - [ROADMAP](../../ROADMAP.md)
 - [CONTRIBUTING](../../CONTRIBUTING.md)
 - [LICENSE](../../LICENSE)
-

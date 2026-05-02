@@ -28,8 +28,9 @@ Depends:
 Recommends:
  pandoc,
  python3-html2text
-Description: Minimal modern markdown viewer and editor for Linux
- VertexWrite is a GTK3/WebKit desktop app for reading and editing markdown files
- without Electron. It provides preview mode, live split view editing,
- syntax highlighting, command palette navigation, folder search,
- checkbox/task toggling, and optional export through pandoc.
+Description: Edit Markdown locally or over SSH/SFTP
+ VertexWrite is a GTK3/WebKit desktop app for opening, previewing, and editing
+ Markdown documents wherever they live: local folders or remote servers over
+ SSH/SFTP. It provides preview mode, live split view editing, syntax
+ highlighting, command palette navigation, folder search, checkbox/task
+ toggling, and optional export through pandoc.

@@ -1,12 +1,15 @@
 name: vertexwrite
 base: core24
-version: "0.7.4"
+version: "0.7.5"
 title: VertexWrite
-summary: Markdown editor with local and SSH/SFTP file browsing
+summary: Edit Markdown locally or over SSH/SFTP
 description: |
-  VertexWrite is a GTK3/WebKit markdown editor for Linux.
+  VertexWrite is a GTK3/WebKit Markdown editor for Linux. It opens,
+  previews, and edits documents wherever they live: local folders or
+  remote servers over SSH/SFTP.
+
   It provides a clean preview mode, split live editing, command palette
-  navigation, local and SSH/SFTP file browsing, folder search, and export
+  navigation, local and remote file browsing, folder search, and export
   helpers.
 license: MIT
 website:

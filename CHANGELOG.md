@@ -6,9 +6,20 @@ versioning follows [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.7.5] — 2026-05-02
+
+### Added
+- Added a command-palette action for connecting to SSH/SFTP from the keyboard-driven workflow.
+
+### Changed
+- Updated product positioning around opening and editing Markdown in local folders or on remote servers over SSH/SFTP.
+- Refreshed README screenshots and captions so public docs show the current VertexWrite name, version, and remote-first workflow.
+- Updated the keyboard shortcuts reference and wiki navigation for local and SSH/SFTP file browsing.
+- Removed legacy Flatpak `--libdir=lib` overrides now that the current Flatpak Builder sets `/app/lib` automatically.
+
 ### Fixed
-- Build Flatpak Meson modules with `/app/lib` as the library directory so
-  runtime typelibs and launcher paths are visible inside the sandbox.
+- Kept Flatpak builds on the current Builder-provided `/app/lib` layout without
+  carrying legacy explicit `--libdir=lib` overrides.
 
 ## [0.7.4] — 2026-05-02
 

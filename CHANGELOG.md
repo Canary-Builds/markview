@@ -6,6 +6,10 @@ versioning follows [SemVer](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+- Build Flatpak Meson modules with `/app/lib` as the library directory so
+  runtime typelibs and launcher paths are visible inside the sandbox.
+
 ## [0.7.4] — 2026-05-02
 
 ### Changed

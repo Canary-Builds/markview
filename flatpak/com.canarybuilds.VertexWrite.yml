@@ -17,6 +17,7 @@ modules:
   - name: gtksourceview4
     buildsystem: meson
     config-opts:
+      - --libdir=lib
       - -Dgtk_doc=false
       - -Dgir=true
       - -Dvapi=false
@@ -30,6 +31,8 @@ modules:
 
   - name: vertexwrite
     buildsystem: meson
+    config-opts:
+      - --libdir=lib
     sources:
       - type: git
         url: https://github.com/Canary-Builds/vertexwrite.git
